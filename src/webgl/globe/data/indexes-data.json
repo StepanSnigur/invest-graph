@@ -1,0 +1,41 @@
+{
+  "type": "IndexesCollection",
+  "indexes": [
+    {
+      "text": "OVB",
+      "size": 3.0,
+      "country": "Russia",
+      "name": "RTSI",
+      "lat": "62.25",
+      "lng": "80.15",
+      "price": "-1,44%"
+    },
+    {
+      "text": "OVB",
+      "size": 3.0,
+      "country": "China",
+      "name": "HSI",
+      "lat": "35.54",
+      "lng": "106.23",
+      "price": "-0,70%"
+    },
+    {
+      "text": "OVB",
+      "size": 3.0,
+      "country": "USA",
+      "name": "S&P 500",
+      "lat": "149.50",
+      "lng": "77.45",
+      "price": "0,04%"
+    },
+    {
+      "text": "OVB",
+      "size": 3.0,
+      "country": "Europe",
+      "name": "ATX",
+      "lat": "51.16",
+      "lng": "23.85",
+      "price": "-0,44%"
+    }
+  ]
+}
