@@ -7,6 +7,7 @@ import {
 import styled from 'styled-components'
 
 import { Main } from './pages/Main'
+import { Graph } from './pages/Graph'
 
 const MainWrapper = styled.div`
   background: linear-gradient(90deg, #1d1e20, #1a1a24);
@@ -19,6 +20,9 @@ const App = () => {
       <Router>
         <Switch>
           <Route path="/" exact component={Main} />
+          <Route path="/graph/:id" render={({ match }) => {
+            return <Graph id={match.params.id} />
+          }}/>
         </Switch>
       </Router>
     </MainWrapper>
