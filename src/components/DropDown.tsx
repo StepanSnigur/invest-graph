@@ -1,5 +1,6 @@
-import React, { useState } from 'react'
+import React, { useState, useContext } from 'react'
 import styled from 'styled-components'
+import { IAppTheme, ThemeContext } from '../context/ThemeContext'
 
 const DropDownWrapper = styled.div`
   height: 80%;
@@ -14,8 +15,8 @@ const DropDownButton = styled.button`
   padding: ${(props: { showIcon: boolean }) => props.showIcon ? '0 24px 0 16px' : '0 10px'};
   border: none;
   border-radius: 8px;
-  background: #303b51;
-  color: #dcdccc;
+  background: ${(props: IAppTheme) => props.theme.button};
+  color: ${(props: IAppTheme) => props.theme.text};
   cursor: pointer;
 `
 const DropDownIndicator = styled.span`
@@ -43,14 +44,14 @@ const DropDownOptionsWrapper = styled.div`
   border-radius: 8px;
   display: flex;
   flex-direction: column;
-  background: #303b51;
-  color: #dcdccc;
+  background: ${(props: IAppTheme) => props.theme.button};
+  color: ${(props: IAppTheme) => props.theme.text};
 `
 const DropDownOption = styled.button`
   padding: 7px 0;
   margin-bottom: 3px;
   color: #dcdccc;
-  background: #303b51;
+  background: ${(props: IAppTheme) => props.theme.button};
   border: none;
   border-radius: 8px;
   min-width: 200px;
@@ -58,8 +59,8 @@ const DropDownOption = styled.button`
   cursor: pointer;
   
   &:hover {
-    background: #7c96af;
-    color: #0f181f;
+    background: ${(props: IAppTheme) => props.theme.lightButton};
+    color: ${(props: IAppTheme) => props.theme.darkText};
   }
   &:last-child {
     margin-bottom: 0;
@@ -77,6 +78,7 @@ interface IDropDown {
 }
 export const DropDown: React.FC<IDropDown> = ({ title, options, showIcon = false }) => {
   const [isOpen, setIsOpen] = useState(false)
+  const themeContext = useContext(ThemeContext)
 
   const handleDropDownClose = () => {
     setIsOpen(false)
@@ -86,13 +88,17 @@ export const DropDown: React.FC<IDropDown> = ({ title, options, showIcon = false
     <>
       {isOpen ? <DropDownOptionsBackground onClick={handleDropDownClose} /> : null}
       <DropDownWrapper>
-        <DropDownButton onClick={() => setIsOpen(!isOpen)} showIcon={showIcon}>
+        <DropDownButton
+          onClick={() => setIsOpen(!isOpen)}
+          showIcon={showIcon}
+          theme={themeContext.colors}
+        >
           {title}
           {showIcon
             ? <DropDownIndicator isOpen={isOpen}>&#129171;</DropDownIndicator>
             : null}
         </DropDownButton>
-        {isOpen ? <DropDownOptionsWrapper>
+        {isOpen ? <DropDownOptionsWrapper theme={themeContext.colors}>
           {options.map((option, i) => (
             <DropDownOption
               key={i}
@@ -100,6 +106,7 @@ export const DropDown: React.FC<IDropDown> = ({ title, options, showIcon = false
                 option.onPress(option.name)
                 handleDropDownClose()
               }}
+              theme={themeContext.colors}
             >{option.name}</DropDownOption>
           ))}
         </DropDownOptionsWrapper> : null}

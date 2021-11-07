@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import {
   BrowserRouter as Router,
   Switch,
@@ -6,26 +6,30 @@ import {
 } from 'react-router-dom'
 import styled from 'styled-components'
 
+import { ThemeContext, IAppTheme } from './context/ThemeContext'
 import { Main } from './pages/Main'
 import { Graph } from './pages/Graph'
 
 const MainWrapper = styled.div`
-  background: linear-gradient(90deg, #1d1e20, #1a1a24);
+  background: ${({ theme }: IAppTheme) =>
+          `linear-gradient(90deg, ${theme.mainBackground}, ${theme.secondaryBackground})`};
   min-height: 100vh;
 `
 
 const App = () => {
+  const themeContext = useContext(ThemeContext)
+
   return (
-    <MainWrapper>
-      <Router>
-        <Switch>
+    <Router>
+      <Switch>
+        <MainWrapper theme={themeContext.colors}>
           <Route path="/" exact component={Main} />
           <Route path="/graph/:id" render={({ match }) => {
             return <Graph id={match.params.id} />
           }}/>
-        </Switch>
-      </Router>
-    </MainWrapper>
+        </MainWrapper>
+      </Switch>
+    </Router>
   )
 }
 
