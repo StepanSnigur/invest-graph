@@ -1,5 +1,7 @@
-import React, { useRef, useState, useEffect } from 'react'
+import React, { useRef, useState, useEffect, useContext } from 'react'
 import styled from 'styled-components'
+import { ThemeContext, IAppTheme } from '../context/ThemeContext'
+import { isStockGoingUp } from '../utils/isStockGoingUp'
 
 const ChartWrapper = styled.div`
   grid-area: Chart;
@@ -8,7 +10,9 @@ const ChartWrapper = styled.div`
   height: 100%;
 `
 const ChartCanvas = styled.canvas`
-  background: #f5f5f5;
+  background: ${(props: IAppTheme) => props.theme.secondaryBackground};
+  border: 2px solid ${(props: IAppTheme) => props.theme.lightButton};
+  border-radius: 8px;
 `
 
 const mockData = {
@@ -242,6 +246,7 @@ export const Chart = () => {
   const [chartData, setChartData] = useState<any[]>([])
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const chartWrapperRef = useRef<HTMLDivElement | null>(null)
+  const { colors } = useContext(ThemeContext)
 
   useEffect(() => {
     chartWrapperRef.current && setCanvasSize({
@@ -260,22 +265,20 @@ export const Chart = () => {
 
     const valuesRange = Math.abs(maxValue - minValue)
     if (ctx && chartData.length) {
-      ctx.fillStyle = '#000'
-
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight)
       chartData.forEach((data, i) => {
         const { open, close } = data
+        ctx.fillStyle = isStockGoingUp(open, close) ? colors.stockUp : colors.stockDown
+
         const openValuePosition = (open - minValue) * 100 / valuesRange
         const closeValuePosition = (close - minValue) * 100 / valuesRange
-        // console.log(openValuePosition, closeValuePosition, '123')
 
         const topIndent = canvasHeight - (canvasHeight / 100 * openValuePosition)
         const bottomIndent = canvasHeight - (canvasHeight / 100 * closeValuePosition)
         ctx.fillRect(i * columnWidth, bottomIndent, columnWidth, topIndent - bottomIndent)
-        // console.log(openValuePosition, closeValuePosition, valuesRange, '123')
-        // console.log(topIndent, bottomIndent)
       })
     }
-  }, [chartData, canvasSize])
+  }, [chartData, canvasSize, colors])
 
   const getMinMaxValue = (values: any[]) => {
     const prices = values
@@ -290,12 +293,17 @@ export const Chart = () => {
   }
   const drawChart = () => {
     const { values } = mockData.AAPL
-    setChartData(values)
+    setChartData(values.reverse())
   }
 
   return (
     <ChartWrapper ref={chartWrapperRef}>
-      <ChartCanvas ref={canvasRef} width={canvasSize.width} height={canvasSize.height}>
+      <ChartCanvas
+        ref={canvasRef}
+        width={canvasSize.width}
+        height={canvasSize.height}
+        theme={colors}
+      >
         Браузер не поддерживает Canvas
       </ChartCanvas>
     </ChartWrapper>

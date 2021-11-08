@@ -19,6 +19,8 @@ const DEFAULT_THEME_COLORS = {
     lightButton: '#7c96af',
     text: '#dcdccc',
     darkText: '#0f181f',
+    stockUp: 'green',
+    stockDown: 'red',
   },
   // TODO
   light: {
@@ -28,6 +30,8 @@ const DEFAULT_THEME_COLORS = {
     lightButton: '#7c96af',
     text: '#dcdccc',
     darkText: '#0f181f',
+    stockUp: 'green',
+    stockDown: 'red',
   },
 }
 export const ThemeContext = React.createContext({
