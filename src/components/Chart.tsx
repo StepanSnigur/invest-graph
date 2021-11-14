@@ -278,7 +278,7 @@ export const Chart = () => {
 
         const topIndent = canvasHeight - (canvasHeight / 100 * openValuePosition)
         const bottomIndent = canvasHeight - (canvasHeight / 100 * closeValuePosition)
-        ctx.fillRect(i * columnWidth, bottomIndent, columnWidth, topIndent - bottomIndent)
+        ctx.fillRect(i * columnWidth, bottomIndent, columnWidth - 10, topIndent - bottomIndent)
       })
     }
   }, [chartData, canvasSize, colors])
