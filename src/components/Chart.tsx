@@ -2,9 +2,10 @@ import React, { useRef, useState, useEffect, useContext } from 'react'
 import styled from 'styled-components'
 import { ThemeContext, IAppTheme } from '../context/ThemeContext'
 import { isStockGoingUp } from '../utils/isStockGoingUp'
+import { ChartPrices } from './ChartPrices'
 
 const ChartWrapper = styled.div`
-  grid-area: Chart;
+  display: flex;
   box-sizing: border-box;
   width: 80%;
   height: 100%;
@@ -12,7 +13,9 @@ const ChartWrapper = styled.div`
 const ChartCanvas = styled.canvas`
   background: ${(props: IAppTheme) => props.theme.secondaryBackground};
   border: 2px solid ${(props: IAppTheme) => props.theme.lightButton};
-  border-radius: 8px;
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+  padding: 5px 0;
 `
 
 const mockData = {
@@ -306,6 +309,14 @@ export const Chart = () => {
       >
         Браузер не поддерживает Canvas
       </ChartCanvas>
+      <ChartPrices
+        width={canvasSize.width / 16}
+        height={canvasSize.height}
+        min={150.50999}
+        max={151.6579}
+        current={150}
+        valuesRange={1.1479100000000244}
+      />
     </ChartWrapper>
   )
 }
