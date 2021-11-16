@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef, useContext } from 'react'
 import styled from 'styled-components'
 import { ThemeContext, IAppTheme } from '../context/ThemeContext'
 import { roundPrice } from '../utils/roundPrice'
+import { observer } from 'mobx-react-lite'
+import { chart } from '../store/chart'
 
 const PricesCanvas = styled.canvas`
   background: ${(props: IAppTheme) => props.theme.secondaryBackground};
@@ -9,24 +11,14 @@ const PricesCanvas = styled.canvas`
   border-left: none;
   border-top-right-radius: 8px;
   border-bottom-right-radius: 8px;
+  padding-bottom: 25px;
 `
 
 interface IChartPrices {
   width: number,
   height: number,
-  min: number,
-  max: number,
-  current: number,
-  valuesRange: number,
 }
-export const ChartPrices: React.FC<IChartPrices> = ({
-  width,
-  height,
-  min,
-  max,
-  current,
-  valuesRange,
-}) => {
+export const ChartPrices: React.FC<IChartPrices> = observer(({ width, height, }) => {
   const [canvasContext, setCanvasContext] = useState<CanvasRenderingContext2D | null>(null)
   const [textMetrics, setTextMetrics] = useState({
     width: 0,
@@ -36,9 +28,12 @@ export const ChartPrices: React.FC<IChartPrices> = ({
   const { colors } = useContext(ThemeContext)
 
   useEffect(() => {
+    const min = chart.chartData.minPrice
+    const max = chart.chartData.maxPrice
+
     // returns height from top of chart to price in %
     const getPricePosition = (price: number) => {
-      const percentage = 100 * (max - price) / valuesRange
+      const percentage = 100 * (max - price) / chart.pricesRange
       return height / 100 * percentage
     }
     const placePriceOnChart = (price: number, defaultPosition?: number) => {
@@ -58,7 +53,7 @@ export const ChartPrices: React.FC<IChartPrices> = ({
       // ctx.fillText(roundPrice(max).toString(), (width - textWidth) / 2, maxPricePosition + 12)
     }
     const placeMedianPrices = () => {
-      const pricesCount = Math.floor(height / (textMetrics.height + 30) - 2)
+      const pricesCount = Math.floor(height / (textMetrics.height + 40) - 2)
 
       new Array(pricesCount - 1).fill(0).reduce((prev) => {
         const interval = (max - min) / pricesCount
@@ -72,9 +67,9 @@ export const ChartPrices: React.FC<IChartPrices> = ({
       placeMinMaxPrices()
       placeMedianPrices()
     }
-  }, [canvasContext, min, max, height, width, valuesRange, textMetrics])
+  }, [canvasContext, height, width, textMetrics])
   useEffect(() => {
-    if (canvasRef.current && min && max && height) {
+    if (canvasRef.current && height) {
       const ctx = canvasRef.current?.getContext('2d')
 
       if (ctx) {
@@ -82,7 +77,7 @@ export const ChartPrices: React.FC<IChartPrices> = ({
 
         ctx.fillStyle = colors.text
         ctx.font = '14px Trebuchet MS,roboto,ubuntu,sans-serif'
-        const textMetrics = ctx.measureText(min.toString())
+        const textMetrics = ctx.measureText(chart.chartData.minPrice.toString())
         setTextMetrics({
           width: textMetrics.width,
           height: textMetrics.fontBoundingBoxAscent + textMetrics.fontBoundingBoxDescent
@@ -91,10 +86,7 @@ export const ChartPrices: React.FC<IChartPrices> = ({
         ctx.clearRect(0, 0, width, height)
       }
     }
-  }, [min, max, width, height, valuesRange, colors, canvasRef])
-  useEffect(() => {
-
-  }, [current, canvasRef])
+  }, [width, height, colors, canvasRef])
 
   return (
     <PricesCanvas
@@ -104,4 +96,4 @@ export const ChartPrices: React.FC<IChartPrices> = ({
       theme={colors}
     />
   )
-}
+})
