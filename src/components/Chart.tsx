@@ -271,6 +271,7 @@ export const Chart = () => {
       ctx.clearRect(0, 0, canvasWidth, canvasHeight)
       chartData.forEach((data, i) => {
         const { open, close } = data
+        const [date, time] = data.datetime.split(' ')
         ctx.fillStyle = isStockGoingUp(open, close) ? colors.stockUp : colors.stockDown
 
         const openValuePosition = (open - minValue) * 100 / valuesRange
@@ -278,7 +279,12 @@ export const Chart = () => {
 
         const topIndent = canvasHeight - (canvasHeight / 100 * openValuePosition)
         const bottomIndent = canvasHeight - (canvasHeight / 100 * closeValuePosition)
+
         ctx.fillRect(i * columnWidth, bottomIndent, columnWidth - 10, topIndent - bottomIndent)
+        if (i % 3 === 0) {
+          ctx.fillText(time, i * columnWidth, canvasHeight + 15, columnWidth - 10)
+          ctx.fillText(date, i * columnWidth, canvasHeight + 25, columnWidth - 10)
+        }
       })
     }
   }, [chartData, canvasSize, colors])
@@ -304,7 +310,7 @@ export const Chart = () => {
       <ChartCanvas
         ref={canvasRef}
         width={canvasSize.width}
-        height={canvasSize.height}
+        height={canvasSize.height + 30}
         theme={colors}
       >
         Браузер не поддерживает Canvas
