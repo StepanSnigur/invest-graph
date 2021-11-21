@@ -32,23 +32,23 @@ export const Chart = observer(() => {
   const { colors } = useContext(ThemeContext)
 
   useEffect(() => {
-    if (chartWrapperRef.current) {
-      const ctx = canvasRef.current!.getContext('2d')
-      setCanvasSize({
-        width: chartWrapperRef.current.offsetWidth,
-        height: chartWrapperRef.current.offsetHeight,
-      })
-      const chartLibrary = ctx ? new ChartLibrary(
-        chartWrapperRef.current.offsetWidth,
-        chartWrapperRef.current.offsetHeight,
-        colors,
-        ctx,
-      ) : null
-      setChartLibrary(chartLibrary)
-    }
+    const ctx = canvasRef.current!.getContext('2d')
+    setCanvasSize({
+      width: chartWrapperRef.current!.offsetWidth,
+      height: chartWrapperRef.current!.offsetHeight,
+    })
+    const chartLibrary = ctx ? new ChartLibrary(
+      chartWrapperRef.current!.offsetWidth,
+      chartWrapperRef.current!.offsetHeight,
+      colors,
+      ctx,
+    ) : null
+    chartLibrary?.showPreloader()
+    setChartLibrary(chartLibrary)
 
     const init = async () => {
       await chart.loadChart('AAPL')
+      chartLibrary?.hidePreloader()
     }
     init()
   }, [chartWrapperRef, colors])

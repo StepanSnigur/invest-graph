@@ -29,7 +29,7 @@ class Preloader {
     const { x, y, radius, width, color } = this.options
 
     this.update()
-    this.ctx.clearRect(x - 100, y - 100, 300, 300)
+    this.ctx.clearRect(x - radius * 2, y - radius * 2, radius * 4, radius * 4)
     this.ctx.beginPath()
     this.ctx.strokeStyle = color
     this.reverse
