@@ -78,9 +78,9 @@ class Chart {
 
     const animation = () => {
       preloader.draw()
-      requestAnimationFrame(animation)
+      this.preloaderAnimationId = requestAnimationFrame(animation)
     }
-    this.preloaderAnimationId = requestAnimationFrame(animation)
+    requestAnimationFrame(animation)
   }
   hidePreloader = () => {
     this.preloaderAnimationId && cancelAnimationFrame(this.preloaderAnimationId)
