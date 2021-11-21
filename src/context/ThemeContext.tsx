@@ -7,6 +7,8 @@ export interface IThemeColors {
   lightButton: string,
   text: string,
   darkText: string,
+  stockUp: string,
+  stockDown: string,
 }
 export type IAppTheme = {
   theme: IThemeColors
