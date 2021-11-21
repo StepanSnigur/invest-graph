@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useContext } from 'react'
 import styled from 'styled-components'
 import { ThemeContext, IAppTheme } from '../context/ThemeContext'
 import { roundPrice } from '../utils/roundPrice'
+import { autorun } from 'mobx'
 import { observer } from 'mobx-react-lite'
 import { chart } from '../store/chart'
 
@@ -20,14 +21,17 @@ interface IChartPrices {
 }
 export const ChartPrices: React.FC<IChartPrices> = observer(({ width, height, }) => {
   const [canvasContext, setCanvasContext] = useState<CanvasRenderingContext2D | null>(null)
-  const [textMetrics, setTextMetrics] = useState({
-    width: 0,
-    height:  0,
-  })
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const { colors } = useContext(ThemeContext)
 
-  useEffect(() => {
+  useEffect(() => autorun(() => {
+    if (!canvasContext) return false
+
+    const textMeasures = canvasContext.measureText(roundPrice(chart.chartData.minPrice).toString())
+    const textMetrics = {
+      width: textMeasures?.width,
+      height: textMeasures?.fontBoundingBoxAscent + textMeasures?.fontBoundingBoxDescent,
+    }
     const min = chart.chartData.minPrice
     const max = chart.chartData.maxPrice
 
@@ -63,11 +67,9 @@ export const ChartPrices: React.FC<IChartPrices> = observer(({ width, height, })
       }, min)
     }
 
-    if (canvasContext) {
-      placeMinMaxPrices()
-      placeMedianPrices()
-    }
-  }, [canvasContext, height, width, textMetrics])
+    placeMinMaxPrices()
+    placeMedianPrices()
+  }))
   useEffect(() => {
     if (canvasRef.current && height) {
       const ctx = canvasRef.current?.getContext('2d')
@@ -77,11 +79,6 @@ export const ChartPrices: React.FC<IChartPrices> = observer(({ width, height, })
 
         ctx.fillStyle = colors.text
         ctx.font = '14px Trebuchet MS,roboto,ubuntu,sans-serif'
-        const textMetrics = ctx.measureText(chart.chartData.minPrice.toString())
-        setTextMetrics({
-          width: textMetrics.width,
-          height: textMetrics.fontBoundingBoxAscent + textMetrics.fontBoundingBoxDescent
-        })
 
         ctx.clearRect(0, 0, width, height)
       }
