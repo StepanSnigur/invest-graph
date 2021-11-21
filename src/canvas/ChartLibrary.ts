@@ -38,9 +38,9 @@ class Chart {
     if (!this.settings.colors) throw new Error('You must provide colors to chart')
 
     this.clearCanvas()
-    const gapBetweenColumns = 10
     const canvasHeight = this.sizes.height
     const columnWidth = this.sizes.width / data.length
+    const gapBetweenColumns = columnWidth * 0.15 // 15% of column width
     const { stockUp, stockDown } = this.settings.colors
 
     data.forEach((data, i) => {
