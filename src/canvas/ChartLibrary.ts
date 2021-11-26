@@ -43,10 +43,11 @@ class Chart {
     const gapBetweenColumns = columnWidth * 0.15 // 15% of column width
     const { stockUp, stockDown } = this.settings.colors
 
-    data.forEach((data, i) => {
-      const { open, close } = data
-      const [date, time] = data.datetime.split(' ')
-      this.ctx!.fillStyle = isStockGoingUp(+open, +close) ? stockUp : stockDown
+    data.forEach((tickerData, i) => {
+      const { open, close } = tickerData
+      const paintColor = isStockGoingUp(+open, +close) ? stockUp : stockDown
+      const [date, time] = tickerData.datetime.split(' ')
+      this.ctx!.fillStyle = paintColor
 
       const openValuePosition = (+open - minPrice) * 100 / chart.pricesRange
       const closeValuePosition = (+close - minPrice) * 100 / chart.pricesRange
@@ -63,7 +64,20 @@ class Chart {
       if (i % 3 === 0) {
         this.ctx!.fillText(time, i * columnWidth, canvasHeight + 15)
       }
+      if (i === data.length - 1) {
+        this.ctx!.strokeStyle = paintColor
+        this.setLastPriceLine(bottomIndent)
+      }
     })
+  }
+  setLastPriceLine = (pricePosition: number) => {
+    if (!this.ctx) throw new Error('Lost canvas context')
+
+    this.ctx.setLineDash([8, 12])
+    this.ctx.beginPath()
+    this.ctx.moveTo(0, pricePosition)
+    this.ctx.lineTo(this.sizes.width, pricePosition)
+    this.ctx.stroke()
   }
   showPreloader = () => {
     if (!this.settings.colors) throw new Error('You must provide colors to chart')
