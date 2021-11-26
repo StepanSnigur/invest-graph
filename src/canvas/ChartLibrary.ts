@@ -41,7 +41,7 @@ class Chart {
     const canvasHeight = this.sizes.height
     const columnWidth = this.sizes.width / data.length
     const gapBetweenColumns = columnWidth * 0.15 // 15% of column width
-    const { stockUp, stockDown } = this.settings.colors
+    const { stockUp, stockDown, text } = this.settings.colors
 
     data.forEach((tickerData, i) => {
       const { open, close } = tickerData
@@ -62,6 +62,7 @@ class Chart {
         topIndent - bottomIndent,
       )
       if (i % 3 === 0) {
+        this.ctx!.fillStyle = text
         this.ctx!.fillText(time, i * columnWidth, canvasHeight + 15)
       }
       if (i === data.length - 1) {
