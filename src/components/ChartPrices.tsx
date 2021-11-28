@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef, useContext } from 'react'
 import styled from 'styled-components'
 import { ThemeContext, IAppTheme } from '../context/ThemeContext'
-import { roundPrice } from '../utils/roundPrice'
 import { autorun } from 'mobx'
 import { observer } from 'mobx-react-lite'
 import { chart } from '../store/chart'
+import { ChartPrices as PricesChart } from '../canvas/ChartPrices'
 
 const PricesCanvas = styled.canvas`
   background: ${(props: IAppTheme) => props.theme.secondaryBackground};
@@ -20,67 +20,28 @@ interface IChartPrices {
   height: number,
 }
 export const ChartPrices: React.FC<IChartPrices> = observer(({ width, height, }) => {
-  const [canvasContext, setCanvasContext] = useState<CanvasRenderingContext2D | null>(null)
+  const [pricesLibrary, setPricesLibrary] = useState<PricesChart | null>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const { colors } = useContext(ThemeContext)
 
   useEffect(() => autorun(() => {
-    if (!canvasContext) return false
-
-    const textMeasures = canvasContext.measureText(roundPrice(chart.chartData.minPrice).toString())
-    const textMetrics = {
-      width: textMeasures?.width,
-      height: textMeasures?.fontBoundingBoxAscent + textMeasures?.fontBoundingBoxDescent,
+    if (pricesLibrary) {
+      const { minPrice, maxPrice } = chart.chartData
+      pricesLibrary.setMinMaxPrices(minPrice, maxPrice)
+      pricesLibrary.drawChart()
     }
-    const min = chart.chartData.minPrice
-    const max = chart.chartData.maxPrice
-
-    // returns height from top of chart to price in %
-    const getPricePosition = (price: number) => {
-      const percentage = 100 * (max - price) / chart.pricesRange
-      return height / 100 * percentage
-    }
-    const placePriceOnChart = (price: number, defaultPosition?: number) => {
-      canvasContext && canvasContext.fillText(
-        roundPrice(price).toString(),
-        Math.trunc((width - textMetrics.width) / 2),
-        Math.trunc(defaultPosition || getPricePosition(price)),
-      )
-    }
-    const placeMinMaxPrices = () => {
-      const minPricePosition = getPricePosition(min)
-      const maxPricePosition = getPricePosition(max)
-
-      placePriceOnChart(min, minPricePosition - 10)
-      placePriceOnChart(max, maxPricePosition + 14)
-      // ctx.fillText(roundPrice(min).toString(), (width - textWidth) / 2, minPricePosition - 10)
-      // ctx.fillText(roundPrice(max).toString(), (width - textWidth) / 2, maxPricePosition + 12)
-    }
-    const placeMedianPrices = () => {
-      const pricesCount = Math.floor(height / (textMetrics.height + 40) - 2)
-
-      new Array(pricesCount - 1).fill(0).reduce((prev) => {
-        const interval = (max - min) / pricesCount
-        const curr = prev + interval
-        placePriceOnChart(+roundPrice(curr))
-        return curr
-      }, min)
-    }
-
-    placeMinMaxPrices()
-    placeMedianPrices()
   }))
   useEffect(() => {
     if (canvasRef.current && height) {
       const ctx = canvasRef.current?.getContext('2d')
 
       if (ctx) {
-        setCanvasContext(ctx)
+        const pricesLibrary = new PricesChart(width, height, colors, ctx)
+        pricesLibrary.drawChart()
+        setPricesLibrary(pricesLibrary)
 
         ctx.fillStyle = colors.text
         ctx.font = '14px Trebuchet MS,roboto,ubuntu,sans-serif'
-
-        ctx.clearRect(0, 0, width, height)
       }
     }
   }, [width, height, colors, canvasRef])
