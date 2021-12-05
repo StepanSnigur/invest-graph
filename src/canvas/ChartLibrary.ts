@@ -1,4 +1,4 @@
-import { chart, ITickerData } from '../store/chart'
+import { ITickerData } from '../store/chart'
 import { isStockGoingUp } from '../utils/isStockGoingUp'
 import { IThemeColors } from '../context/ThemeContext'
 import { Preloader } from './Preloader'
@@ -34,7 +34,7 @@ class Chart {
   setChartColors = (colors: IThemeColors) => {
     this.settings.colors = colors
   }
-  drawChart = (data: ITickerData[], minPrice: number) => {
+  drawChart = (data: ITickerData[], minPrice: number, pricesRange: number) => {
     if (!this.settings.colors) throw new Error('You must provide colors to chart')
 
     this.clearCanvas()
@@ -44,22 +44,31 @@ class Chart {
     const { stockUp, stockDown, text } = this.settings.colors
 
     data.forEach((tickerData, i) => {
-      const { open, close } = tickerData
+      const { open, close, low, high } = tickerData
       const paintColor = isStockGoingUp(+open, +close) ? stockUp : stockDown
       const [date, time] = tickerData.datetime.split(' ')
       this.ctx!.fillStyle = paintColor
 
-      const openValuePosition = (+open - minPrice) * 100 / chart.pricesRange
-      const closeValuePosition = (+close - minPrice) * 100 / chart.pricesRange
+      const topIndent = this.getPricePositionOnChart(+open, minPrice, pricesRange)
+      const bottomIndent = this.getPricePositionOnChart(+close, minPrice, pricesRange)
+      const topCandleIndent = this.getPricePositionOnChart(+high, minPrice, pricesRange)
+      const bottomCandleIndent = this.getPricePositionOnChart(+low, minPrice, pricesRange)
 
-      const topIndent = canvasHeight - (canvasHeight / 100 * openValuePosition)
-      const bottomIndent = canvasHeight - (canvasHeight / 100 * closeValuePosition)
-
+      // draw chart cell
       this.ctx!.fillRect(
         i * columnWidth,
         bottomIndent,
         columnWidth - gapBetweenColumns,
         topIndent - bottomIndent,
+      )
+      // draw candle
+      const candleWidth = (columnWidth - gapBetweenColumns) / 20
+      const candleXPosition = i * columnWidth + (columnWidth / 2) - candleWidth
+      this.ctx!.fillRect(
+        candleXPosition,
+        bottomCandleIndent,
+        candleWidth,
+        topCandleIndent - bottomCandleIndent
       )
       if (i % 3 === 0) {
         this.ctx!.fillStyle = text
@@ -70,6 +79,10 @@ class Chart {
         this.setLastPriceLine(bottomIndent)
       }
     })
+  }
+  getPricePositionOnChart = (price: number, minPrice: number, pricesRange: number) => {
+    const percentPosition = (price - minPrice) * 100 / pricesRange
+    return this.sizes.height - (this.sizes.height / 100 * percentPosition)
   }
   setLastPriceLine = (pricePosition: number) => {
     if (!this.ctx) throw new Error('Lost canvas context')
