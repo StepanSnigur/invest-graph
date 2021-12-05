@@ -4,7 +4,13 @@ import { IThemeColors } from '../context/ThemeContext'
 import { Preloader } from './Preloader'
 
 interface IChartSettings {
-  colors: IThemeColors | null
+  colors: IThemeColors | null,
+  scaleY: number,
+  datePadding: number,
+}
+interface ICursorData {
+  x: number,
+  y: number,
 }
 class Chart {
   sizes = {
@@ -13,7 +19,9 @@ class Chart {
   }
   ctx: CanvasRenderingContext2D | null = null
   settings: IChartSettings = {
-    colors: null
+    colors: null,
+    scaleY: 0.9,
+    datePadding: 5,
   }
   preloaderAnimationId: ReturnType<typeof requestAnimationFrame> | null = null
 
@@ -34,7 +42,7 @@ class Chart {
   setChartColors = (colors: IThemeColors) => {
     this.settings.colors = colors
   }
-  drawChart = (data: ITickerData[], minPrice: number, pricesRange: number) => {
+  drawChart = (data: ITickerData[], minPrice: number, pricesRange: number, cursorData: ICursorData) => {
     if (!this.settings.colors) throw new Error('You must provide colors to chart')
 
     this.clearCanvas()
@@ -72,26 +80,40 @@ class Chart {
       )
       if (i % 3 === 0) {
         this.ctx!.fillStyle = text
-        this.ctx!.fillText(time, i * columnWidth, canvasHeight + 15)
+        this.ctx!.fillText(time, i * columnWidth, canvasHeight - this.settings.datePadding)
       }
-      if (i === data.length - 1) {
+      if (i === data.length - 1 && cursorData.x === 0 && cursorData.y === 0) {
         this.ctx!.strokeStyle = paintColor
-        this.setLastPriceLine(bottomIndent)
+        this.setCursorPosition(0, bottomIndent)
       }
     })
+
+    if (cursorData.x !== 0 && cursorData.y !== 0) {
+      this.ctx!.strokeStyle = this.settings.colors.text
+      this.setCursorPosition(cursorData.x, cursorData.y)
+    }
   }
   getPricePositionOnChart = (price: number, minPrice: number, pricesRange: number) => {
     const percentPosition = (price - minPrice) * 100 / pricesRange
-    return this.sizes.height - (this.sizes.height / 100 * percentPosition)
+    const scaledPosition = (this.sizes.height - (this.sizes.height / 100 * percentPosition)) * this.settings.scaleY
+    const scaledHeight = (this.sizes.height - this.sizes.height * this.settings.scaleY) / 2
+    return scaledPosition + scaledHeight
   }
-  setLastPriceLine = (pricePosition: number) => {
+  setCursorPosition = (x: number, y: number) => {
     if (!this.ctx) throw new Error('Lost canvas context')
 
     this.ctx.setLineDash([8, 12])
     this.ctx.beginPath()
-    this.ctx.moveTo(0, pricePosition)
-    this.ctx.lineTo(this.sizes.width, pricePosition)
+    this.ctx.moveTo(0, y)
+    this.ctx.lineTo(this.sizes.width, y)
     this.ctx.stroke()
+
+    if (x > 0) {
+      this.ctx.beginPath()
+      this.ctx.moveTo(x, 0)
+      this.ctx.lineTo(x, this.sizes.height)
+      this.ctx.stroke()
+    }
   }
   showPreloader = () => {
     if (!this.settings.colors) throw new Error('You must provide colors to chart')

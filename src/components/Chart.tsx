@@ -18,7 +18,6 @@ const ChartCanvas = styled.canvas`
   border: 2px solid ${(props: IAppTheme) => props.theme.lightButton};
   border-top-left-radius: 8px;
   border-bottom-left-radius: 8px;
-  padding: 5px 0;
 `
 
 export const Chart = observer(() => {
@@ -27,12 +26,17 @@ export const Chart = observer(() => {
     height: 0,
   })
   const [chartLibrary, setChartLibrary] = useState<ChartLibrary | null>(null)
+  const [chartPosition, setChartPosition] = useState({
+    top: 0,
+    left: 0,
+  })
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const chartWrapperRef = useRef<HTMLDivElement | null>(null)
   const { colors } = useContext(ThemeContext)
 
   useEffect(() => {
     const ctx = canvasRef.current!.getContext('2d')
+    const { top, left } = canvasRef.current!.getBoundingClientRect()
     setCanvasSize({
       width: chartWrapperRef.current!.offsetWidth,
       height: chartWrapperRef.current!.offsetHeight,
@@ -45,6 +49,10 @@ export const Chart = observer(() => {
     ) : null
     chartLibrary?.showPreloader()
     setChartLibrary(chartLibrary)
+    setChartPosition({
+      top,
+      left,
+    })
 
     const init = async () => {
       await chart.loadChart('AAPL')
@@ -55,16 +63,31 @@ export const Chart = observer(() => {
 
   useEffect(() => autorun(() => {
     const { minPrice } = chart.chartData
-    chartLibrary?.drawChart(chart.tickerData, minPrice, chart.pricesRange)
+    chartLibrary?.drawChart(chart.tickerData, minPrice, chart.pricesRange, {
+      x: chart.chartData.cursorX,
+      y: chart.chartData.cursorY,
+    })
   }))
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    const x = e.clientX - chartPosition.left
+    const y = e.clientY - chartPosition.top
+
+    chart.moveCursor(x, y)
+  }
+  const handleMouseLeave = () => {
+    chart.moveCursor(0, 0)
+  }
 
   return (
     <ChartWrapper ref={chartWrapperRef}>
       <ChartCanvas
         ref={canvasRef}
         width={canvasSize.width}
-        height={canvasSize.height + 30}
+        height={canvasSize.height}
         theme={colors}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
       >
         Браузер не поддерживает Canvas
       </ChartCanvas>
