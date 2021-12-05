@@ -13,6 +13,8 @@ export interface IChartData {
   minPrice: number,
   maxPrice: number,
   currentPrice: number | null,
+  cursorX: number,
+  cursorY: number,
 }
 
 class Chart {
@@ -21,6 +23,8 @@ class Chart {
     minPrice: 0,
     maxPrice: 0,
     currentPrice: null,
+    cursorX: 0,
+    cursorY: 0,
   }
   // TODO
   chartSettings = {}
@@ -37,6 +41,10 @@ class Chart {
     } catch (e) {
       console.log(e)
     }
+  }
+  moveCursor = (x: number, y: number) => {
+    this.chartData.cursorX = x
+    this.chartData.cursorY = y
   }
 
   setMinMaxPrice = () => {
