@@ -55,7 +55,7 @@ export const Chart = observer(() => {
 
   useEffect(() => autorun(() => {
     const { minPrice } = chart.chartData
-    chartLibrary?.drawChart(chart.tickerData, minPrice)
+    chartLibrary?.drawChart(chart.tickerData, minPrice, chart.pricesRange)
   }))
 
   return (
