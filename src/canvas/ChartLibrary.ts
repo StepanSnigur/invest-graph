@@ -123,6 +123,7 @@ class Chart {
       }
     })
 
+    // draw cursor
     if (cursorData.x !== 0 && cursorData.y !== 0) {
       this.ctx!.strokeStyle = this.settings.colors.text
       this.setCursorPosition(cursorData.x, cursorData.y)
