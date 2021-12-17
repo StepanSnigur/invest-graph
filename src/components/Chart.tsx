@@ -30,11 +30,13 @@ export const Chart = observer(() => {
     top: 0,
     left: 0,
   })
+  const [isLoading, setIsLoading] = useState(true)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const chartWrapperRef = useRef<HTMLDivElement | null>(null)
   const { colors } = useContext(ThemeContext)
 
   useEffect(() => {
+    setIsLoading(true)
     const ctx = canvasRef.current!.getContext('2d')
     const { top, left } = canvasRef.current!.getBoundingClientRect()
     setCanvasSize({
@@ -57,6 +59,7 @@ export const Chart = observer(() => {
     const init = async () => {
       await chart.loadChart('AAPL')
       chartLibrary?.hidePreloader()
+      setIsLoading(false)
     }
     init()
   }, [chartWrapperRef, colors])
@@ -73,10 +76,10 @@ export const Chart = observer(() => {
     const x = e.clientX - chartPosition.left
     const y = e.clientY - chartPosition.top
 
-    chart.moveCursor(x, y)
+    !isLoading && chart.moveCursor(x, y)
   }
   const handleMouseLeave = () => {
-    chart.moveCursor(0, 0)
+    !isLoading && chart.moveCursor(0, 0)
   }
 
   return (
