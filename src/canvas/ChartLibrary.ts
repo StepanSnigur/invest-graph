@@ -7,10 +7,18 @@ interface IChartSettings {
   colors: IThemeColors | null,
   scaleY: number,
   datePadding: number,
+  focusedCandleBorderWidth: number,
 }
 interface ICursorData {
   x: number,
   y: number,
+}
+interface IChartCandle {
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  idx: number,
 }
 class Chart {
   sizes = {
@@ -22,8 +30,11 @@ class Chart {
     colors: null,
     scaleY: 0.9,
     datePadding: 5,
+    focusedCandleBorderWidth: 2,
   }
   preloaderAnimationId: ReturnType<typeof requestAnimationFrame> | null = null
+  chartCandles: IChartCandle[] = []
+  focusedCandle: IChartCandle | null = null
 
   constructor(width: number, height: number, colors: IThemeColors, ctx: CanvasRenderingContext2D) {
     this.sizes = {
@@ -44,12 +55,18 @@ class Chart {
   }
   drawChart = (data: ITickerData[], minPrice: number, pricesRange: number, cursorData: ICursorData) => {
     if (!this.settings.colors) throw new Error('You must provide colors to chart')
+    this.chartCandles = []
 
     this.clearCanvas()
     const canvasHeight = this.sizes.height
     const columnWidth = this.sizes.width / data.length
     const gapBetweenColumns = columnWidth * 0.15 // 15% of column width
     const { stockUp, stockDown, text } = this.settings.colors
+
+    // remove focused candle if cursor out of chart
+    if (!cursorData.x) {
+      this.focusedCandle = null
+    }
 
     data.forEach((tickerData, i) => {
       const { open, close, low, high } = tickerData
@@ -62,14 +79,31 @@ class Chart {
       const topCandleIndent = this.getPricePositionOnChart(+high, minPrice, pricesRange)
       const bottomCandleIndent = this.getPricePositionOnChart(+low, minPrice, pricesRange)
 
-      // draw chart cell
-      this.ctx!.fillRect(
-        i * columnWidth,
-        bottomIndent,
-        columnWidth - gapBetweenColumns,
-        topIndent - bottomIndent,
-      )
       // draw candle
+      const candle: IChartCandle = {
+        x: i * columnWidth,
+        y: bottomIndent,
+        width: columnWidth - gapBetweenColumns,
+        height: topIndent - bottomIndent,
+        idx: i,
+      }
+      this.ctx!.fillRect(
+        candle.x,
+        candle.y,
+        candle.width,
+        candle.height,
+      )
+      if (this.focusedCandle && this.focusedCandle.idx === i) {
+        this.drawCandleBorder(
+          candle.x - this.settings.focusedCandleBorderWidth,
+          candle.y - this.settings.focusedCandleBorderWidth,
+          candle.width + this.settings.focusedCandleBorderWidth * 2,
+          candle.height + this.settings.focusedCandleBorderWidth * 2
+        )
+      }
+      this.chartCandles.push(candle)
+
+      // draw candle tail
       const candleWidth = (columnWidth - gapBetweenColumns) / 20
       const candleXPosition = i * columnWidth + (columnWidth / 2) - candleWidth
       this.ctx!.fillRect(
@@ -78,6 +112,7 @@ class Chart {
         candleWidth,
         topCandleIndent - bottomCandleIndent
       )
+
       if (i % 3 === 0) {
         this.ctx!.fillStyle = text
         this.ctx!.fillText(time, i * columnWidth, canvasHeight - this.settings.datePadding)
@@ -102,6 +137,7 @@ class Chart {
   setCursorPosition = (x: number, y: number) => {
     if (!this.ctx) throw new Error('Lost canvas context')
 
+    this.ctx.lineWidth = 2
     this.ctx.setLineDash([8, 12])
     this.ctx.beginPath()
     this.ctx.moveTo(0, y)
@@ -114,6 +150,8 @@ class Chart {
       this.ctx.lineTo(x, this.sizes.height)
       this.ctx.stroke()
     }
+
+    this.focusedCandle = this.getCandle(x)
   }
   showPreloader = () => {
     if (!this.settings.colors) throw new Error('You must provide colors to chart')
@@ -134,6 +172,16 @@ class Chart {
   }
   hidePreloader = () => {
     this.preloaderAnimationId && cancelAnimationFrame(this.preloaderAnimationId)
+  }
+  getCandle = (cursorX: number) => {
+    return this.chartCandles
+      .find((candle) => cursorX >= candle.x && cursorX <= candle.x + candle.width) || null
+  }
+  drawCandleBorder = (x: number, y: number, width: number, height: number) => {
+    this.ctx!.strokeStyle = this.settings.colors!.text
+    this.ctx!.lineWidth = this.settings.focusedCandleBorderWidth * 2
+    this.ctx!.setLineDash([])
+    this.ctx!.strokeRect(x, y, width, height)
   }
 }
 
