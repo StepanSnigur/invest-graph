@@ -9,6 +9,9 @@ interface IChartSettings {
   datePadding: number,
   focusedCandleBorderWidth: number,
 }
+interface IChartHandlers {
+  onCandleFocus: (candleIdx: number) => void
+}
 interface ICursorData {
   x: number,
   y: number,
@@ -32,14 +35,21 @@ class Chart {
     datePadding: 5,
     focusedCandleBorderWidth: 2,
   }
+  handlers: IChartHandlers = {
+    onCandleFocus: () => {}
+  }
   preloaderAnimationId: ReturnType<typeof requestAnimationFrame> | null = null
   chartCandles: IChartCandle[] = []
   focusedCandle: IChartCandle | null = null
 
-  constructor(width: number, height: number, colors: IThemeColors, ctx: CanvasRenderingContext2D) {
+  constructor(width: number, height: number, colors: IThemeColors, ctx: CanvasRenderingContext2D, handlers: IChartHandlers) {
     this.sizes = {
       width,
       height
+    }
+    this.handlers = {
+      ...this.handlers,
+      ...handlers
     }
 
     if (!ctx) throw new Error('You must provide canvas context to chart library')
@@ -100,6 +110,7 @@ class Chart {
           candle.width + this.settings.focusedCandleBorderWidth * 2,
           candle.height + this.settings.focusedCandleBorderWidth * 2
         )
+        this.handlers.onCandleFocus(this.focusedCandle.idx)
       }
       this.chartCandles.push(candle)
 

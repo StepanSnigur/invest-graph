@@ -48,6 +48,9 @@ export const Chart = observer(() => {
       chartWrapperRef.current!.offsetHeight,
       colors,
       ctx,
+      {
+        onCandleFocus: handleCandleFocus
+      }
     ) : null
     chartLibrary?.showPreloader()
     setChartLibrary(chartLibrary)
@@ -80,6 +83,9 @@ export const Chart = observer(() => {
   }
   const handleMouseLeave = () => {
     !isLoading && chart.moveCursor(0, 0)
+  }
+  const handleCandleFocus = (candleIdx: number) => {
+
   }
 
   return (
