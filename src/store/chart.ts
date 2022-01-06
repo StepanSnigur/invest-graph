@@ -26,6 +26,7 @@ class Chart {
     cursorX: 0,
     cursorY: 0,
   }
+  error: string | false = false
   // TODO
   chartSettings = {}
 
@@ -39,6 +40,7 @@ class Chart {
       this.setTickerData(tickerData.values.reverse())
       this.setMinMaxPrice()
     } catch (e) {
+      this.setError('Не удалось загрузить график')
       console.log(e)
     }
   }
@@ -61,6 +63,9 @@ class Chart {
   }
   setTickerData = (tickerData: ITickerData[]) => {
     this.tickerData = tickerData
+  }
+  setError = (error: string) => {
+    this.error = error
   }
 
   get pricesRange() {

@@ -68,11 +68,15 @@ export const Chart = observer(() => {
   }, [chartWrapperRef, colors])
 
   useEffect(() => autorun(() => {
-    const { minPrice } = chart.chartData
-    chartLibrary?.drawChart(chart.tickerData, minPrice, chart.pricesRange, {
-      x: chart.chartData.cursorX,
-      y: chart.chartData.cursorY,
-    })
+    if (chart.error) {
+      onChartError(chart.error)
+    } else {
+      const { minPrice } = chart.chartData
+      chartLibrary?.drawChart(chart.tickerData, minPrice, chart.pricesRange, {
+        x: chart.chartData.cursorX,
+        y: chart.chartData.cursorY,
+      })
+    }
   }))
 
   const handleMouseMove = (e: React.MouseEvent) => {
@@ -86,6 +90,9 @@ export const Chart = observer(() => {
   }
   const handleCandleFocus = (candleIdx: number) => {
 
+  }
+  const onChartError = (error: string) => {
+    chartLibrary?.showErrorMessage(error)
   }
 
   return (
