@@ -2,6 +2,7 @@ import { ITickerData } from '../store/chart'
 import { isStockGoingUp } from '../utils/isStockGoingUp'
 import { IThemeColors } from '../context/ThemeContext'
 import { Preloader } from './Preloader'
+import errorImageUrl from '../assets/images/error-icon.png'
 
 interface IChartSettings {
   colors: IThemeColors | null,
@@ -194,6 +195,26 @@ class Chart {
     this.ctx!.lineWidth = this.settings.focusedCandleBorderWidth * 2
     this.ctx!.setLineDash([])
     this.ctx!.strokeRect(x, y, width, height)
+  }
+
+  showErrorMessage = (message: string) => {
+    this.clearCanvas()
+    this.ctx!.fillStyle = this.settings.colors!.text
+    this.ctx!.font = '24px sans-serif'
+
+    const { width } = this.ctx!.measureText(message)
+    this.ctx!.fillText(message, this.sizes.width / 2 - width / 2, this.sizes.height / 2)
+
+    const ERROR_IMAGE_SIZE = 64
+    const errorImage = new Image()
+    errorImage.src = errorImageUrl
+    this.ctx!.drawImage(
+      errorImage,
+      this.sizes.width / 2 - ERROR_IMAGE_SIZE / 2,
+      this.sizes.height / 2 - ERROR_IMAGE_SIZE * 1.5,
+      ERROR_IMAGE_SIZE,
+      ERROR_IMAGE_SIZE,
+    )
   }
 }
 
