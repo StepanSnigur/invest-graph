@@ -1,4 +1,4 @@
-import { makeAutoObservable } from 'mobx'
+import { makeAutoObservable, runInAction } from 'mobx'
 import { chartApi } from '../api/ChartApi'
 
 export interface ITickerData {
@@ -26,6 +26,7 @@ class Chart {
     cursorX: 0,
     cursorY: 0,
   }
+  focusedCandleIdx: null | number = null
   error: string | false = false
   // TODO
   chartSettings = {}
@@ -66,6 +67,11 @@ class Chart {
   }
   setError = (error: string) => {
     this.error = error
+  }
+  setFocusedCandleIdx = (idx: number | null) => {
+    runInAction(() => {
+      this.focusedCandleIdx = idx
+    })
   }
 
   get pricesRange() {
