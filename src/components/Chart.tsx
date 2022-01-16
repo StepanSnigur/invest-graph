@@ -67,6 +67,7 @@ export const Chart = observer(() => {
     init()
   }, [chartWrapperRef, colors])
 
+  // TODO try reaction instead of autorun
   useEffect(() => autorun(() => {
     if (chart.error) {
       onChartError(chart.error)
@@ -89,7 +90,7 @@ export const Chart = observer(() => {
     !isLoading && chart.moveCursor(0, 0)
   }
   const handleCandleFocus = (candleIdx: number) => {
-
+    chart.setFocusedCandleIdx(candleIdx)
   }
   const onChartError = (error: string) => {
     chartLibrary?.showErrorMessage(error)
