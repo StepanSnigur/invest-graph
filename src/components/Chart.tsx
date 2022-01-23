@@ -20,7 +20,10 @@ const ChartCanvas = styled.canvas`
   border-bottom-left-radius: 8px;
 `
 
-export const Chart = observer(() => {
+interface IChart {
+  ticker: string
+}
+export const Chart: React.FC<IChart> = observer(({ ticker }) => {
   const [canvasSize, setCanvasSize] = useState({
     width: 0,
     height: 0,
@@ -39,12 +42,15 @@ export const Chart = observer(() => {
     setIsLoading(true)
     const ctx = canvasRef.current!.getContext('2d')
     const { top, left } = canvasRef.current!.getBoundingClientRect()
+    // chart width without a prices bar
+    const canvasWidth = chartWrapperRef.current!.offsetWidth - chartWrapperRef.current!.offsetWidth / 16
+
     setCanvasSize({
-      width: chartWrapperRef.current!.offsetWidth,
+      width: canvasWidth,
       height: chartWrapperRef.current!.offsetHeight,
     })
     const chartLibrary = ctx ? new ChartLibrary(
-      chartWrapperRef.current!.offsetWidth,
+      canvasWidth,
       chartWrapperRef.current!.offsetHeight,
       colors,
       ctx,
@@ -60,7 +66,7 @@ export const Chart = observer(() => {
     })
 
     const init = async () => {
-      await chart.loadChart('AAPL')
+      await chart.loadChart(ticker)
       chartLibrary?.hidePreloader()
       setIsLoading(false)
     }

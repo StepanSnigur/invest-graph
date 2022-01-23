@@ -24,7 +24,7 @@ export const Graph: React.FC<IGraph> = ({ id }) => {
     <GraphWrapper>
       <ChartControls />
       <ChartContentWrapper>
-        <Chart />
+        <Chart ticker={id} />
         <ChartSidebar />
       </ChartContentWrapper>
       <ChartSubData />
