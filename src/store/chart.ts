@@ -9,6 +9,13 @@ export interface ITickerData {
   close: string,
   volume: string,
 }
+interface ITickerMeta {
+  currency: string,
+  exchange: string,
+  symbol: string,
+  name: string,
+  logo: string,
+}
 export interface IChartData {
   minPrice: number,
   maxPrice: number,
@@ -19,6 +26,8 @@ export interface IChartData {
 
 class Chart {
   tickerData: ITickerData[] = []
+  tickerMeta: ITickerMeta | null = null
+
   chartData: IChartData = {
     minPrice: 0,
     maxPrice: 0,
@@ -38,6 +47,8 @@ class Chart {
   loadChart = async (ticker: string) => {
     try {
       const tickerData = await chartApi.getChart(ticker)
+      const tickerInfo = await chartApi.getTickerMeta(ticker)
+      this.setTickerMeta({ ...tickerInfo.meta, logo: tickerInfo.url })
       this.setTickerData(tickerData.values.reverse())
       this.setMinMaxPrice()
     } catch (e) {
@@ -64,6 +75,9 @@ class Chart {
   }
   setTickerData = (tickerData: ITickerData[]) => {
     this.tickerData = tickerData
+  }
+  setTickerMeta = (tickerMeta: ITickerMeta) => {
+    this.tickerMeta = tickerMeta
   }
   setError = (error: string) => {
     this.error = error
