@@ -65,6 +65,31 @@ class Chart {
   setChartColors = (colors: IThemeColors) => {
     this.settings.colors = colors
   }
+  drawChartCells = () => {
+    if (!this.ctx) throw new Error('Canvas context not provided')
+    this.ctx.strokeStyle = this.settings.colors!.button
+    this.ctx.lineWidth = 1
+    this.ctx.setLineDash([])
+
+    const LINES_COUNT = 10
+    const lines = [...Array(LINES_COUNT)]
+    const verticalGap = this.sizes.width / LINES_COUNT
+    const horizontalGap = this.sizes.height / LINES_COUNT
+
+    lines.forEach((_, i) => {
+      // vertical lines
+      this.ctx!.beginPath()
+      this.ctx!.moveTo(verticalGap * i, 0)
+      this.ctx!.lineTo(verticalGap * i, this.sizes.height)
+      this.ctx!.stroke()
+
+      // horizontal lines
+      this.ctx!.beginPath()
+      this.ctx!.moveTo(0, horizontalGap * i)
+      this.ctx!.lineTo(this.sizes.width, horizontalGap * i)
+      this.ctx!.stroke()
+    })
+  }
   drawChart = (data: ITickerData[], minPrice: number, pricesRange: number, cursorData: ICursorData) => {
     if (!this.settings.colors) throw new Error('You must provide colors to chart')
     this.chartCandles = []
@@ -79,6 +104,7 @@ class Chart {
       this.focusedCandle = null
     }
 
+    data.length && this.drawChartCells()
     data.forEach((tickerData, i) => {
       const { open, close, low, high } = tickerData
       const paintColor = isStockGoingUp(+open, +close) ? stockUp : stockDown
