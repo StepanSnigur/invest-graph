@@ -24,6 +24,7 @@ interface IChartCandle {
   height: number,
   idx: number,
 }
+
 class Chart {
   sizes = {
     width: 0,
@@ -69,10 +70,9 @@ class Chart {
     this.chartCandles = []
 
     this.clearCanvas()
-    const canvasHeight = this.sizes.height
     const columnWidth = this.sizes.width / data.length
     const gapBetweenColumns = columnWidth * 0.15 // 15% of column width
-    const { stockUp, stockDown, text } = this.settings.colors
+    const { stockUp, stockDown } = this.settings.colors
 
     // remove focused candle if cursor out of chart
     if (!cursorData.x) {
@@ -82,7 +82,6 @@ class Chart {
     data.forEach((tickerData, i) => {
       const { open, close, low, high } = tickerData
       const paintColor = isStockGoingUp(+open, +close) ? stockUp : stockDown
-      const [date, time] = tickerData.datetime.split(' ')
       this.ctx!.fillStyle = paintColor
 
       const topIndent = this.getPricePositionOnChart(+open, minPrice, pricesRange)
@@ -125,19 +124,35 @@ class Chart {
         topCandleIndent - bottomCandleIndent
       )
 
-      if (i % 3 === 0) {
-        this.ctx!.fillStyle = text
-        this.ctx!.fillText(time, i * columnWidth, canvasHeight - this.settings.datePadding)
-      }
       if (i === data.length - 1 && cursorData.x === 0 && cursorData.y === 0) {
         this.ctx!.strokeStyle = paintColor
         this.setCursorPosition(0, bottomIndent)
       }
     })
 
-    // draw cursor
+    // TODO change call location
+    this.drawChartDates(data)
+    this.drawChartCursor(cursorData)
+  }
+  drawChartDates = (data: ITickerData[]) => {
+    if (data.length === 0) return false
+
+    const dateTextWidth = this.ctx?.measureText(data[0].datetime).width || 0
+    const datesOnScreenCount = Math.floor(this.sizes.width / dateTextWidth) - 2
+    const arrDivider = Math.ceil(data.length / datesOnScreenCount)
+    const dates = data.map((el, i) => i % arrDivider === 0
+      ? { idx: i, ...el }
+      : null).filter(el => el !== null)
+
+    dates.forEach((candle, i) => {
+      const dateWidth = this.sizes.width / datesOnScreenCount
+      this.ctx!.fillStyle = this.settings.colors?.text || '#000'
+      candle && this.ctx!.fillText(candle.datetime, i * dateWidth, this.sizes.height - this.settings.datePadding)
+    })
+  }
+  drawChartCursor = (cursorData: ICursorData) => {
     if (cursorData.x !== 0 && cursorData.y !== 0) {
-      this.ctx!.strokeStyle = this.settings.colors.text
+      this.ctx!.strokeStyle = this.settings.colors?.text || '#000'
       this.setCursorPosition(cursorData.x, cursorData.y)
     }
   }
