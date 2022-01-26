@@ -203,9 +203,9 @@ class Chart {
       this.ctx.moveTo(x, 0)
       this.ctx.lineTo(x, this.sizes.height)
       this.ctx.stroke()
-    }
 
-    this.focusedCandle = this.getCandle(x)
+      this.focusedCandle = this.getCandle(x)
+    }
   }
   showPreloader = () => {
     if (!this.settings.colors) throw new Error('You must provide colors to chart')
