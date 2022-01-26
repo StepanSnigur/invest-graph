@@ -35,6 +35,12 @@ const TickerSymbol = styled.span`
 const LastTickerPrice = styled.h3`
   font-size: 36px;
   font-weight: normal;
+  margin-bottom: 0;
+`
+const CurrentCandleInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
 `
 
 export const ChartSidebar = observer(() => {
@@ -45,6 +51,7 @@ export const ChartSidebar = observer(() => {
     })
   }, [])
 
+  const currentCandle = chart.tickerData[chart.focusedCandleIdx ?? chart.tickerData.length - 1]
   return (
     <ChartSidebarWrapper theme={colors}>
       {chart.tickerMeta
@@ -57,7 +64,13 @@ export const ChartSidebar = observer(() => {
           <LastTickerPrice>
             {chart.tickerData[chart.tickerData.length - 1]?.close} {chart.tickerMeta.currency}
           </LastTickerPrice>
-      </div>
+          <CurrentCandleInfo>
+            <span>МАКС {currentCandle?.high}</span>
+            <span>МИН {currentCandle?.low}</span>
+            <span>ОТКР {currentCandle?.open}</span>
+            <span>ЗАКР {currentCandle?.close}</span>
+          </CurrentCandleInfo>
+        </div>
         : <h2>loading</h2>}
     </ChartSidebarWrapper>
   )

@@ -71,7 +71,7 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
       setIsLoading(false)
     }
     init()
-  }, [chartWrapperRef, colors])
+  }, [chartWrapperRef, colors, ticker])
 
   // TODO try reaction instead of autorun
   useEffect(() => autorun(() => {
@@ -93,7 +93,10 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
     !isLoading && chart.moveCursor(x, y)
   }
   const handleMouseLeave = () => {
-    !isLoading && chart.moveCursor(0, 0)
+    if (!isLoading) {
+      chart.moveCursor(0, 0)
+      chart.setFocusedCandleIdx(null)
+    }
   }
   const handleCandleFocus = (candleIdx: number) => {
     chart.setFocusedCandleIdx(candleIdx)
