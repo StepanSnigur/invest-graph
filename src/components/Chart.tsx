@@ -23,6 +23,9 @@ const ChartCanvas = styled.canvas`
 interface IChart {
   ticker: string
 }
+interface IDragData {
+  startX: number | null
+}
 export const Chart: React.FC<IChart> = observer(({ ticker }) => {
   const [canvasSize, setCanvasSize] = useState({
     width: 0,
@@ -34,6 +37,9 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
     left: 0,
   })
   const [isLoading, setIsLoading] = useState(true)
+  const [dragData, setDragData] = useState<IDragData>({
+    startX: null
+  })
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const chartWrapperRef = useRef<HTMLDivElement | null>(null)
   const { colors } = useContext(ThemeContext)
@@ -59,6 +65,7 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
       }
     ) : null
     chartLibrary?.showPreloader()
+    chartLibrary?.setMaxCandlesOnScreenCount(chart.chartSettings.maxCandlesOnScreenCount)
     setChartLibrary(chartLibrary)
     setChartPosition({
       top,
@@ -78,11 +85,10 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
     if (chart.error) {
       onChartError(chart.error)
     } else {
-      const { minPrice } = chart.chartData
-      chartLibrary?.drawChart(chart.tickerData, minPrice, chart.pricesRange, {
+      chartLibrary?.drawChart(chart.tickerData, {
         x: chart.chartData.cursorX,
         y: chart.chartData.cursorY,
-      })
+      }, chart.chartData.offsetX)
     }
   }))
 
@@ -91,6 +97,11 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
     const y = e.clientY - chartPosition.top
 
     !isLoading && chart.moveCursor(x, y)
+
+    if (!isLoading && dragData.startX !== null) {
+      const delta = e.pageX - dragData.startX
+      chart.setOffsetX(delta)
+    }
   }
   const handleMouseLeave = () => {
     if (!isLoading) {
@@ -98,6 +109,19 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
       chart.setFocusedCandleIdx(null)
     }
   }
+  const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    setDragData({
+      startX: e.pageX,
+    })
+  }
+  const handleMouseUp = () => {
+    setDragData({
+      startX: null,
+    })
+    chart.checkNewData(canvasSize.width)
+    chart.setPrevOffsetX()
+  }
+
   const handleCandleFocus = (candleIdx: number) => {
     chart.setFocusedCandleIdx(candleIdx)
   }
@@ -114,6 +138,8 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
         theme={colors}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
       >
         Браузер не поддерживает Canvas
       </ChartCanvas>

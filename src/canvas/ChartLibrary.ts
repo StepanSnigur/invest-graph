@@ -9,6 +9,8 @@ interface IChartSettings {
   scaleY: number,
   datePadding: number,
   focusedCandleBorderWidth: number,
+  maxCandlesOnScreenCount: number,
+  gridLinesCount: number,
 }
 interface IChartHandlers {
   onCandleFocus: (candleIdx: number) => void
@@ -35,7 +37,9 @@ class Chart {
     colors: null,
     scaleY: 0.9,
     datePadding: 5,
-    focusedCandleBorderWidth: 2,
+    focusedCandleBorderWidth: 1,
+    maxCandlesOnScreenCount: 150,
+    gridLinesCount: 10,
   }
   handlers: IChartHandlers = {
     onCandleFocus: () => {}
@@ -65,16 +69,18 @@ class Chart {
   setChartColors = (colors: IThemeColors) => {
     this.settings.colors = colors
   }
+  setMaxCandlesOnScreenCount = (count: number) => {
+    this.settings.maxCandlesOnScreenCount = count
+  }
   drawChartCells = () => {
     if (!this.ctx) throw new Error('Canvas context not provided')
     this.ctx.strokeStyle = this.settings.colors!.button
     this.ctx.lineWidth = 1
     this.ctx.setLineDash([])
 
-    const LINES_COUNT = 10
-    const lines = [...Array(LINES_COUNT)]
-    const verticalGap = this.sizes.width / LINES_COUNT
-    const horizontalGap = this.sizes.height / LINES_COUNT
+    const lines = [...Array(this.settings.gridLinesCount)]
+    const verticalGap = this.sizes.width / this.settings.gridLinesCount
+    const horizontalGap = this.sizes.height / this.settings.gridLinesCount
 
     lines.forEach((_, i) => {
       // vertical lines
@@ -90,9 +96,28 @@ class Chart {
       this.ctx!.stroke()
     })
   }
-  drawChart = (data: ITickerData[], minPrice: number, pricesRange: number, cursorData: ICursorData) => {
+  getCandlesInScope = (candles: ITickerData[], candleWidth: number, offsetX: number) => {
+    return candles.filter((candle, i) => {
+      const candleX = i * candleWidth + offsetX
+      return candleX < this.sizes.width && candleX >= 0
+    })
+  }
+  sortCandlesPrices = (candlesInScope: ITickerData[]) => {
+    return candlesInScope
+      .map(value => [+value.open, +value.close])
+      .flat()
+      .sort((a, b) => a - b)
+  }
+  drawChart = (data: ITickerData[], cursorData: ICursorData, offsetX: number) => {
     if (!this.settings.colors) throw new Error('You must provide colors to chart')
+
     this.chartCandles = []
+    const defaultColumnWidth = this.sizes.width / this.settings.maxCandlesOnScreenCount
+    const filteredData = this.getCandlesInScope(data, defaultColumnWidth, offsetX)
+
+    const prices = this.sortCandlesPrices(filteredData)
+    const minPrice = prices[0]
+    const pricesRange = prices[prices.length -1] - minPrice
 
     this.clearCanvas()
     const columnWidth = this.sizes.width / data.length
@@ -117,7 +142,7 @@ class Chart {
 
       // draw candle
       const candle: IChartCandle = {
-        x: i * columnWidth,
+        x: i * columnWidth + offsetX,
         y: bottomIndent,
         width: columnWidth - gapBetweenColumns,
         height: topIndent - bottomIndent,
@@ -142,7 +167,7 @@ class Chart {
 
       // draw candle tail
       const candleWidth = (columnWidth - gapBetweenColumns) / 20
-      const candleXPosition = i * columnWidth + (columnWidth / 2) - candleWidth
+      const candleXPosition = (i * columnWidth + (columnWidth / 2) - candleWidth) + offsetX
       this.ctx!.fillRect(
         candleXPosition,
         bottomCandleIndent,
@@ -157,10 +182,10 @@ class Chart {
     })
 
     // TODO change call location
-    this.drawChartDates(data)
+    this.drawChartDates(data, offsetX)
     this.drawChartCursor(cursorData)
   }
-  drawChartDates = (data: ITickerData[]) => {
+  drawChartDates = (data: ITickerData[], offsetX: number) => {
     if (data.length === 0) return false
 
     const dateTextWidth = this.ctx?.measureText(data[0].datetime).width || 0
@@ -173,7 +198,7 @@ class Chart {
     dates.forEach((candle, i) => {
       const dateWidth = this.sizes.width / datesOnScreenCount
       this.ctx!.fillStyle = this.settings.colors?.text || '#000'
-      candle && this.ctx!.fillText(candle.datetime, i * dateWidth, this.sizes.height - this.settings.datePadding)
+      candle && this.ctx!.fillText(candle.datetime, i * dateWidth + offsetX, this.sizes.height - this.settings.datePadding)
     })
   }
   drawChartCursor = (cursorData: ICursorData) => {
