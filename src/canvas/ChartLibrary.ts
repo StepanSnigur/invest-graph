@@ -120,8 +120,7 @@ class Chart {
     const pricesRange = prices[prices.length -1] - minPrice
 
     this.clearCanvas()
-    const columnWidth = this.sizes.width / data.length
-    const gapBetweenColumns = columnWidth * 0.15 // 15% of column width
+    const gapBetweenColumns = defaultColumnWidth * 0.15 // 15% of column width
     const { stockUp, stockDown } = this.settings.colors
 
     // remove focused candle if cursor out of chart
@@ -142,9 +141,9 @@ class Chart {
 
       // draw candle
       const candle: IChartCandle = {
-        x: i * columnWidth + offsetX,
+        x: i * defaultColumnWidth + offsetX,
         y: bottomIndent,
-        width: columnWidth - gapBetweenColumns,
+        width: defaultColumnWidth - gapBetweenColumns,
         height: topIndent - bottomIndent,
         idx: i,
       }
@@ -166,8 +165,8 @@ class Chart {
       this.chartCandles.push(candle)
 
       // draw candle tail
-      const candleWidth = (columnWidth - gapBetweenColumns) / 20
-      const candleXPosition = (i * columnWidth + (columnWidth / 2) - candleWidth) + offsetX
+      const candleWidth = (defaultColumnWidth - gapBetweenColumns) / 20
+      const candleXPosition = (i * defaultColumnWidth + (defaultColumnWidth / 2) - candleWidth) + offsetX
       this.ctx!.fillRect(
         candleXPosition,
         bottomCandleIndent,
@@ -190,7 +189,7 @@ class Chart {
 
     const dateTextWidth = this.ctx?.measureText(data[0].datetime).width || 0
     const datesOnScreenCount = Math.floor(this.sizes.width / dateTextWidth) - 2
-    const arrDivider = Math.ceil(data.length / datesOnScreenCount)
+    const arrDivider = Math.ceil(this.settings.maxCandlesOnScreenCount / datesOnScreenCount)
     const dates = data.map((el, i) => i % arrDivider === 0
       ? { idx: i, ...el }
       : null).filter(el => el !== null)
