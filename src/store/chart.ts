@@ -100,15 +100,28 @@ class Chart {
   setPrevOffsetX = () => {
     this.chartData.prevOffsetX = this.chartData.offsetX
   }
+  // normalize offsetX after pushing elements in the array
+  normalizeOffsetX = (shift: number) => {
+    this.chartData.offsetX = this.chartData.offsetX - shift
+  }
 
   checkNewData = (canvasWidth: number) => {
     if (this.chartData.offsetX > 0) {
-      const columnWidth = canvasWidth / this.tickerData.length
+      const columnWidth = canvasWidth / this.chartSettings.maxCandlesOnScreenCount
       const columnsToGet = Math.ceil(this.chartData.offsetX / columnWidth)
-      console.log(columnsToGet, 'columns to get')
+
+      // TODO move it inside a hook
+      const screenShift = columnWidth * columnsToGet
+      this.normalizeOffsetX(screenShift)
+      this.setPrevOffsetX()
+
+      this.appendCandlesToStart([...this.tickerData].slice(0, columnsToGet))
     }
   }
-  appendCandlesToStart = (candles: ITickerData[]) => {}
+  appendCandlesToStart = (candles: ITickerData[]) => {
+    console.log('append')
+    this.tickerData = [...candles, ...this.tickerData]
+  }
 
   get pricesRange() {
     return Math.abs(this.chartData.maxPrice - this.chartData.minPrice)
