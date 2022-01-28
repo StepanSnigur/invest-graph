@@ -22,6 +22,8 @@ export interface IChartData {
   currentPrice: number | null,
   cursorX: number,
   cursorY: number,
+  offsetX: number,
+  prevOffsetX: number,
 }
 
 class Chart {
@@ -34,11 +36,15 @@ class Chart {
     currentPrice: null,
     cursorX: 0,
     cursorY: 0,
+    offsetX: 0,
+    prevOffsetX: 0,
   }
   focusedCandleIdx: null | number = null
   error: string | false = false
   // TODO
-  chartSettings = {}
+  chartSettings = {
+    maxCandlesOnScreenCount: 150
+  }
 
   constructor() {
     makeAutoObservable(this)
@@ -87,6 +93,22 @@ class Chart {
       this.focusedCandleIdx = idx
     })
   }
+
+  setOffsetX = (offsetX: number) => {
+    this.chartData.offsetX = this.chartData.prevOffsetX + offsetX
+  }
+  setPrevOffsetX = () => {
+    this.chartData.prevOffsetX = this.chartData.offsetX
+  }
+
+  checkNewData = (canvasWidth: number) => {
+    if (this.chartData.offsetX > 0) {
+      const columnWidth = canvasWidth / this.tickerData.length
+      const columnsToGet = Math.ceil(this.chartData.offsetX / columnWidth)
+      console.log(columnsToGet, 'columns to get')
+    }
+  }
+  appendCandlesToStart = (candles: ITickerData[]) => {}
 
   get pricesRange() {
     return Math.abs(this.chartData.maxPrice - this.chartData.minPrice)
