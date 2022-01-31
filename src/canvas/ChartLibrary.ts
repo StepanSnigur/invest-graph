@@ -1,17 +1,11 @@
+import { ChartCore } from './ChartCore'
+import { chartConnector } from '../store/chartConnector'
 import { ITickerData } from '../store/chart'
 import { isStockGoingUp } from '../utils/isStockGoingUp'
 import { IThemeColors } from '../context/ThemeContext'
 import { Preloader } from './Preloader'
 import errorImageUrl from '../assets/images/error-icon.png'
 
-interface IChartSettings {
-  colors: IThemeColors | null,
-  scaleY: number,
-  datePadding: number,
-  focusedCandleBorderWidth: number,
-  maxCandlesOnScreenCount: number,
-  gridLinesCount: number,
-}
 interface IChartHandlers {
   onCandleFocus: (candleIdx: number) => void
 }
@@ -27,20 +21,7 @@ interface IChartCandle {
   idx: number,
 }
 
-class Chart {
-  sizes = {
-    width: 0,
-    height: 0,
-  }
-  ctx: CanvasRenderingContext2D | null = null
-  settings: IChartSettings = {
-    colors: null,
-    scaleY: 0.9,
-    datePadding: 5,
-    focusedCandleBorderWidth: 1,
-    maxCandlesOnScreenCount: 150,
-    gridLinesCount: 10,
-  }
+class Chart extends ChartCore {
   handlers: IChartHandlers = {
     onCandleFocus: () => {}
   }
@@ -49,26 +30,14 @@ class Chart {
   focusedCandle: IChartCandle | null = null
 
   constructor(width: number, height: number, colors: IThemeColors, ctx: CanvasRenderingContext2D, handlers: IChartHandlers) {
-    this.sizes = {
-      width,
-      height
-    }
+    super(width, height, ctx)
     this.handlers = {
       ...this.handlers,
       ...handlers
     }
-
-    if (!ctx) throw new Error('You must provide canvas context to chart library')
-    this.ctx = ctx
     this.setChartColors(colors)
   }
 
-  clearCanvas = () => {
-    this.ctx!.clearRect(0, 0, this.sizes.width, this.sizes.height)
-  }
-  setChartColors = (colors: IThemeColors) => {
-    this.settings.colors = colors
-  }
   setMaxCandlesOnScreenCount = (count: number) => {
     this.settings.maxCandlesOnScreenCount = count
   }
@@ -118,6 +87,7 @@ class Chart {
     const prices = this.sortCandlesPrices(filteredData)
     const minPrice = prices[0]
     const pricesRange = prices[prices.length -1] - minPrice
+    chartConnector.setMinMaxPrices(minPrice, prices[prices.length - 1])
 
     this.clearCanvas()
     const gapBetweenColumns = defaultColumnWidth * 0.15 // 15% of column width
