@@ -82,6 +82,9 @@ class Chart {
   setTickerData = (tickerData: ITickerData[]) => {
     this.tickerData = tickerData
   }
+  appendCandlesToStart = (candles: ITickerData[]) => {
+    this.tickerData = [...candles, ...this.tickerData]
+  }
   setTickerMeta = (tickerMeta: ITickerMeta) => {
     this.tickerMeta = tickerMeta
   }
@@ -105,22 +108,24 @@ class Chart {
     this.chartData.offsetX = this.chartData.offsetX - shift
   }
 
-  checkNewData = (canvasWidth: number) => {
+  checkNewData = async (canvasWidth: number) => {
     if (this.chartData.offsetX > 0) {
       const columnWidth = canvasWidth / this.chartSettings.maxCandlesOnScreenCount
       const columnsToGet = Math.ceil(this.chartData.offsetX / columnWidth)
+
+      const newChartCandles = await this.getNewChartCandles(columnsToGet, this.tickerData[0].datetime)
+      this.appendCandlesToStart(newChartCandles.values.reverse())
 
       // TODO move it inside a hook
       const screenShift = columnWidth * columnsToGet
       this.normalizeOffsetX(screenShift)
       this.setPrevOffsetX()
-
-      this.appendCandlesToStart([...this.tickerData].slice(0, columnsToGet))
     }
   }
-  appendCandlesToStart = (candles: ITickerData[]) => {
-    console.log('append')
-    this.tickerData = [...candles, ...this.tickerData]
+  getNewChartCandles = async (candlesCount: number, endDate: string) => {
+    if (!this.tickerMeta?.symbol) throw new Error('Unknown ticker')
+
+    return await chartApi.getNewChartCandles(this.tickerMeta.symbol, candlesCount, endDate)
   }
 
   get pricesRange() {

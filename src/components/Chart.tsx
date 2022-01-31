@@ -114,11 +114,11 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
       startX: e.pageX,
     })
   }
-  const handleMouseUp = () => {
+  const handleMouseUp = async () => {
     setDragData({
       startX: null,
     })
-    chart.checkNewData(canvasSize.width)
+    await chart.checkNewData(canvasSize.width)
     chart.setPrevOffsetX()
   }
 
