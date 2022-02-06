@@ -110,17 +110,21 @@ class Chart {
   }
 
   checkNewData = async (canvasWidth: number) => {
-    if (this.chartData.offsetX > 0) {
-      const columnWidth = canvasWidth / this.chartSettings.maxCandlesOnScreenCount
-      const columnsToGet = Math.ceil(this.chartData.offsetX / columnWidth)
+    try {
+      if (this.chartData.offsetX > 0) {
+        const columnWidth = canvasWidth / this.chartSettings.maxCandlesOnScreenCount
+        const columnsToGet = Math.ceil(this.chartData.offsetX / columnWidth)
 
-      const newChartCandles = await this.getNewChartCandles(columnsToGet, this.tickerData[0].datetime)
-      this.appendCandlesToStart(newChartCandles.values.reverse())
+        const newChartCandles = await this.getNewChartCandles(columnsToGet, this.tickerData[0].datetime)
+        this.appendCandlesToStart(newChartCandles.values.reverse())
 
-      // TODO move it inside a hook
-      const screenShift = columnWidth * columnsToGet
-      this.normalizeOffsetX(screenShift)
-      this.setPrevOffsetX()
+        // TODO move it inside a hook
+        const screenShift = columnWidth * columnsToGet
+        this.normalizeOffsetX(screenShift)
+        this.setPrevOffsetX()
+      }
+    } catch (e) {
+      this.showAlertMessage('Ошибка при загрузке данных')
     }
   }
   getNewChartCandles = async (candlesCount: number, endDate: string) => {
