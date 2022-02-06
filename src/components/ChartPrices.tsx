@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef, useContext } from 'react'
 import styled from 'styled-components'
 import { ThemeContext, IAppTheme } from '../context/ThemeContext'
-import { reaction } from 'mobx'
+import { autorun } from 'mobx'
 import { observer } from 'mobx-react-lite'
+import { chart } from '../store/chart'
 import { chartConnector } from '../store/chartConnector'
 import { ChartPrices as PricesChart } from '../canvas/ChartPrices'
 
@@ -12,7 +13,6 @@ const PricesCanvas = styled.canvas`
   border-left: none;
   border-top-right-radius: 8px;
   border-bottom-right-radius: 8px;
-  padding-bottom: 25px;
 `
 
 interface IChartPrices {
@@ -24,15 +24,13 @@ export const ChartPrices: React.FC<IChartPrices> = observer(({ width, height, })
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const { colors } = useContext(ThemeContext)
 
-  useEffect(() => reaction(
-    () => chartConnector.data,
-    (data) => {
-      if (pricesLibrary) {
-        pricesLibrary.setMinMaxPrices(data.minChartPrice, data.maxChartPrice)
-        pricesLibrary.drawChart()
-      }
+  useEffect(() => autorun(() => {
+    const { minChartPrice, maxChartPrice } = chartConnector.data
+    if (pricesLibrary && minChartPrice && maxChartPrice) {
+      pricesLibrary.setMinMaxPrices(minChartPrice, maxChartPrice)
+      pricesLibrary.drawChart()
     }
-  ))
+  }))
   useEffect(() => {
     if (canvasRef.current && height) {
       const ctx = canvasRef.current?.getContext('2d')
