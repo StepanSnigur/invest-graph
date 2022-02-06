@@ -30,6 +30,10 @@ export const ChartPrices: React.FC<IChartPrices> = observer(({ width, height, })
       pricesLibrary.setMinMaxPrices(minChartPrice, maxChartPrice)
       pricesLibrary.drawChart()
     }
+    if (pricesLibrary && chart.chartData.cursorX) {
+      const currentPrice = pricesLibrary.getCurrentPrice(chart.chartData.cursorY)
+      pricesLibrary.drawCurrentPrice(currentPrice, chart.chartData.cursorY)
+    }
   }))
   useEffect(() => {
     if (canvasRef.current && height) {

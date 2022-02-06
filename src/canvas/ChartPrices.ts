@@ -49,6 +49,31 @@ class ChartPrices extends ChartCore {
       ) + this.textMetrics.height / 2),
     )
   }
+  getCurrentPrice = (y: number) => {
+    const { maxPrice, minPrice } = this.pricesSettings
+    const scaledHeight = this.sizes.height * this.settings.scaleY
+    const clippedHeight = (this.sizes.height - scaledHeight) / 2
+    const percentPosition = ((scaledHeight + clippedHeight) - y) * 100 / scaledHeight
+    return (percentPosition * (maxPrice - minPrice) / 100) + minPrice
+  }
+  drawCurrentPrice = (price: number, y: number) => {
+    const rectHeight = this.textMetrics.height + 18 // padding vertical 9
+    this.ctx!.fillStyle = this.settings.colors!.button
+    this.roundedRect(
+      this.ctx!,
+      0,
+      y - rectHeight / 2,
+      this.sizes.width,
+      rectHeight,
+      5,
+    )
+    this.ctx!.fillStyle = this.settings.colors!.text
+    this.ctx!.fillText(
+      roundPrice(price).toString(),
+      (this.sizes.width - this.textMetrics.width) / 2,
+      y,
+    )
+  }
 
   renderPrices = () => {
     this.placePriceOnChart(this.pricesSettings.minPrice)
