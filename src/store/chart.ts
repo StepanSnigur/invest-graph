@@ -41,6 +41,7 @@ class Chart {
   }
   focusedCandleIdx: null | number = null
   error: string | false = false
+  alertMessage: string | null = null
   // TODO
   chartSettings = {
     maxCandlesOnScreenCount: 150
@@ -126,6 +127,14 @@ class Chart {
     if (!this.tickerMeta?.symbol) throw new Error('Unknown ticker')
 
     return await chartApi.getNewChartCandles(this.tickerMeta.symbol, candlesCount, endDate)
+  }
+
+  showAlertMessage = (message: string, timeout: number = 3000) => {
+    this.alertMessage = message
+
+    setTimeout(() => {
+      this.alertMessage = null
+    }, timeout)
   }
 
   get pricesRange() {
