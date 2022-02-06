@@ -1,4 +1,5 @@
 import { IThemeColors } from '../context/ThemeContext'
+import { CanvasUtils } from './CanvasUtils'
 
 export interface IChartSettings {
   colors: IThemeColors | null,
@@ -8,7 +9,7 @@ export interface IChartSettings {
   maxCandlesOnScreenCount: number,
   gridLinesCount: number,
 }
-class ChartCore {
+class ChartCore extends CanvasUtils {
   sizes = {
     width: 0,
     height: 0,
@@ -24,6 +25,7 @@ class ChartCore {
   }
 
   constructor(width: number, height: number, ctx: CanvasRenderingContext2D) {
+    super()
     this.sizes = {
       width,
       height,

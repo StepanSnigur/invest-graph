@@ -9,6 +9,7 @@ export interface IThemeColors {
   darkText: string,
   stockUp: string,
   stockDown: string,
+  alert: string,
 }
 export type IAppTheme = {
   theme: IThemeColors
@@ -23,6 +24,7 @@ const DEFAULT_THEME_COLORS = {
     darkText: '#0f181f',
     stockUp: '#00bfa5',
     stockDown: '#f44336',
+    alert: '#4bb1cf',
   },
   // TODO
   light: {
@@ -34,6 +36,7 @@ const DEFAULT_THEME_COLORS = {
     darkText: '#0f181f',
     stockUp: '#00bfa5',
     stockDown: '#f44336',
+    alert: '#4bb1cf',
   },
 }
 export const ThemeContext = React.createContext({
