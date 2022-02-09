@@ -7,11 +7,11 @@ interface IChartPricesSettings {
   maxPrice: number,
 }
 class ChartPrices extends ChartCore {
-  pricesSettings: IChartPricesSettings = {
+  private pricesSettings: IChartPricesSettings = {
     minPrice: 0,
     maxPrice: 0,
   }
-  textMetrics = {
+  private textMetrics = {
     width: 0,
     height: 0,
   }
@@ -26,19 +26,19 @@ class ChartPrices extends ChartCore {
     this.setChartColors(colors)
   }
 
-  setMinMaxPrices = (minPrice: number, maxPrice: number) => {
+  public setMinMaxPrices = (minPrice: number, maxPrice: number) => {
     this.pricesSettings.minPrice = minPrice
     this.pricesSettings.maxPrice = maxPrice
     this.setTextMetrics()
   }
-  setTextMetrics = () => {
-    const textMeasures = this.ctx!.measureText(roundPrice(this.pricesSettings.minPrice).toString())
+  private setTextMetrics = () => {
+    const textMeasures = this.ctx.measureText(roundPrice(this.pricesSettings.minPrice).toString())
     this.textMetrics = {
       width: textMeasures?.width,
       height: textMeasures?.fontBoundingBoxAscent + textMeasures?.fontBoundingBoxDescent,
     }
   }
-  placePriceOnChart = (price: number, defaultPosition?: number) => {
+  private placePriceOnChart = (price: number, defaultPosition?: number) => {
     this.ctx && this.ctx.fillText(
       roundPrice(price).toString(),
       Math.trunc((this.sizes.width - this.textMetrics.width) / 2),
@@ -49,33 +49,33 @@ class ChartPrices extends ChartCore {
       ) + this.textMetrics.height / 2),
     )
   }
-  getCurrentPrice = (y: number) => {
+  public getCurrentPrice = (y: number) => {
     const { maxPrice, minPrice } = this.pricesSettings
     const scaledHeight = this.sizes.height * this.settings.scaleY
     const clippedHeight = (this.sizes.height - scaledHeight) / 2
     const percentPosition = ((scaledHeight + clippedHeight) - y) * 100 / scaledHeight
     return (percentPosition * (maxPrice - minPrice) / 100) + minPrice
   }
-  drawCurrentPrice = (price: number, y: number) => {
+  public drawCurrentPrice = (price: number, y: number) => {
     const rectHeight = this.textMetrics.height + 18 // padding vertical 9
-    this.ctx!.fillStyle = this.settings.colors!.button
+    this.ctx.fillStyle = this.settings.colors!.button
     this.roundedRect(
-      this.ctx!,
+      this.ctx,
       0,
       y - rectHeight / 2,
       this.sizes.width,
       rectHeight,
       5,
     )
-    this.ctx!.fillStyle = this.settings.colors!.text
-    this.ctx!.fillText(
+    this.ctx.fillStyle = this.settings.colors!.text
+    this.ctx.fillText(
       roundPrice(price).toString(),
       (this.sizes.width - this.textMetrics.width) / 2,
       y,
     )
   }
 
-  renderPrices = () => {
+  private renderPrices = () => {
     this.placePriceOnChart(this.pricesSettings.minPrice)
     this.placePriceOnChart(this.pricesSettings.maxPrice)
 
@@ -87,7 +87,7 @@ class ChartPrices extends ChartCore {
       return curr
     }, this.pricesSettings.minPrice)
   }
-  drawChart = () => {
+  public drawChart = () => {
     this.clearCanvas()
     this.renderPrices()
   }

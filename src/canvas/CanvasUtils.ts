@@ -1,5 +1,5 @@
 class CanvasUtils {
-  roundedRect = (
+  public roundedRect = (
     ctx: CanvasRenderingContext2D,
     x: number,
     y: number,

@@ -6,17 +6,16 @@ interface IPreloaderOptions {
   color: string,
 }
 class Preloader {
-  ctx: CanvasRenderingContext2D | null
-  options: IPreloaderOptions
-  angle = 0
-  reverse = false
+  private options: IPreloaderOptions
+  private angle = 0
+  private reverse = false
 
-  constructor(ctx: CanvasRenderingContext2D | null, options: IPreloaderOptions) {
+  constructor(private ctx: CanvasRenderingContext2D, options: IPreloaderOptions) {
     this.ctx = ctx
     this.options = options
   }
 
-  update = () => {
+  private update = () => {
     this.angle += .1
 
     if (this.angle > Math.PI * 2) {
@@ -24,8 +23,7 @@ class Preloader {
       this.reverse = !this.reverse
     }
   }
-  draw = () => {
-    if (!this.ctx) return
+  public draw = () => {
     const { x, y, radius, width, color } = this.options
 
     this.update()

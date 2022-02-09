@@ -10,12 +10,11 @@ export interface IChartSettings {
   gridLinesCount: number,
 }
 class ChartCore extends CanvasUtils {
-  sizes = {
+  protected sizes = {
     width: 0,
     height: 0,
   }
-  ctx: CanvasRenderingContext2D | null = null
-  settings: IChartSettings = {
+  protected settings: IChartSettings = {
     colors: null,
     scaleY: 0.9,
     datePadding: 5,
@@ -24,7 +23,7 @@ class ChartCore extends CanvasUtils {
     gridLinesCount: 10,
   }
 
-  constructor(width: number, height: number, ctx: CanvasRenderingContext2D) {
+  constructor(width: number, height: number, protected ctx: CanvasRenderingContext2D) {
     super()
     this.sizes = {
       width,
@@ -35,14 +34,14 @@ class ChartCore extends CanvasUtils {
     this.ctx = ctx
   }
 
-  setChartColors = (colors: IThemeColors) => {
+  protected setChartColors = (colors: IThemeColors) => {
     this.settings.colors = colors
   }
-  clearCanvas = () => {
-    this.ctx && this.ctx.clearRect(0, 0, this.sizes.width, this.sizes.height)
+  protected clearCanvas = () => {
+    this.ctx.clearRect(0, 0, this.sizes.width, this.sizes.height)
   }
 
-  getPricePosition = (price: number, minPrice: number, maxPrice: number) => {
+  protected getPricePosition = (price: number, minPrice: number, maxPrice: number) => {
     const percentPosition = (price - minPrice) * 100 / (maxPrice - minPrice)
     const scaledPosition = (this.sizes.height - (this.sizes.height / 100 * percentPosition)) * this.settings.scaleY
     const scaledHeight = (this.sizes.height - this.sizes.height * this.settings.scaleY) / 2
