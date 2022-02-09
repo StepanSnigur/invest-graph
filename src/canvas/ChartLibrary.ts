@@ -43,7 +43,6 @@ class Chart extends ChartCore {
     this.settings.maxCandlesOnScreenCount = count
   }
   public drawChartCells = () => {
-    if (!this.ctx) throw new Error('Canvas context not provided')
     this.ctx.strokeStyle = this.settings.colors!.button
     this.ctx.lineWidth = 1
     this.ctx.setLineDash([])
@@ -78,10 +77,7 @@ class Chart extends ChartCore {
       .flat()
       .sort((a, b) => a - b)
   }
-  public drawChart = (data: ITickerData[], cursorData: ICursorData, offsetX: number) => {
-    if (!this.settings.colors) throw new Error('You must provide colors to chart')
-
-    this.chartCandles = []
+  private getMinMaxPricesOnFieldOfView = (data: ITickerData[], offsetX: number) => {
     const defaultColumnWidth = this.sizes.width / this.settings.maxCandlesOnScreenCount
     const filteredData = this.getCandlesInScope(data, defaultColumnWidth, offsetX)
 
@@ -90,16 +86,38 @@ class Chart extends ChartCore {
     const pricesRange = prices[prices.length -1] - minPrice
     chartConnector.setMinMaxPrices(minPrice, prices[prices.length - 1])
 
+    return { defaultColumnWidth, pricesRange, minPrice }
+  }
+  public drawChart = (data: ITickerData[], cursorData: ICursorData, offsetX: number) => {
+    this.chartCandles = []
+    const { defaultColumnWidth, pricesRange, minPrice } = this.getMinMaxPricesOnFieldOfView(data, offsetX)
+
     this.clearCanvas()
-    const gapBetweenColumns = defaultColumnWidth * 0.15 // 15% of column width
-    const { stockUp, stockDown } = this.settings.colors
 
     // remove focused candle if cursor out of chart
     if (!cursorData.x) {
       this.focusedCandle = null
     }
 
-    data.length && this.drawChartCells()
+    if (data.length) {
+      this.drawChartCells()
+      this.drawChartCandles(data, pricesRange, minPrice, defaultColumnWidth, offsetX, cursorData)
+      this.drawChartDates(data, offsetX)
+      this.drawChartCursor(cursorData)
+    }
+  }
+  private drawChartCandles = (
+    data: ITickerData[],
+    pricesRange: number,
+    minPrice: number,
+    defaultColumnWidth: number,
+    offsetX: number,
+    cursorData: ICursorData,
+  ) => {
+    if (!this.settings.colors) throw new Error('You must provide colors to chart')
+    const { stockUp, stockDown } = this.settings.colors
+    const gapBetweenColumns = defaultColumnWidth * 0.15 // 15% of column width
+
     data.forEach((tickerData, i) => {
       const { open, close, low, high } = tickerData
       const paintColor = isStockGoingUp(+open, +close) ? stockUp : stockDown
@@ -150,10 +168,6 @@ class Chart extends ChartCore {
         this.setCursorPosition(0, bottomIndent)
       }
     })
-
-    // TODO change call location
-    this.drawChartDates(data, offsetX)
-    this.drawChartCursor(cursorData)
   }
   private drawChartDates = (data: ITickerData[], offsetX: number) => {
     if (data.length === 0) return false
