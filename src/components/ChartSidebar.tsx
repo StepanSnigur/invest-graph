@@ -1,10 +1,12 @@
 import React, { useContext } from 'react'
 import { observer } from 'mobx-react-lite'
 import { chart } from '../store/chart'
+import { chartConnector } from '../store/chartConnector'
 import styled from 'styled-components'
 import { ThemeContext, IAppTheme } from '../context/ThemeContext'
 
 import { FavouriteButton } from './FavouriteButton'
+import { DayPriceRange } from './DayPriceRange'
 
 const ChartSidebarWrapper = styled.div`
   width: 20%;
@@ -71,6 +73,9 @@ const CurrentCandleInfo = styled.div`
   display: flex;
   flex-direction: column;
   font-size: 12px;
+  margin-bottom: 40px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #808080;
 `
 
 export const ChartSidebar = observer(() => {
@@ -125,6 +130,12 @@ export const ChartSidebar = observer(() => {
           <span>ОТКР {currentCandle?.open}</span>
           <span>ЗАКР {currentCandle?.close}</span>
         </CurrentCandleInfo>
+
+        <DayPriceRange
+          minPrice={chartConnector.data.minChartPrice}
+          maxPrice={chartConnector.data.maxChartPrice}
+          currentPrice={lastPrice}
+        />
       </div>
     </ChartSidebarWrapper>
   )
