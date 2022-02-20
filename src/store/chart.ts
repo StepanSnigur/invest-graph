@@ -17,8 +17,6 @@ interface ITickerMeta {
   logo: string,
 }
 export interface IChartData {
-  minPrice: number,
-  maxPrice: number,
   currentPrice: number | null,
   cursorX: number,
   cursorY: number,
@@ -31,8 +29,6 @@ class Chart {
   tickerMeta: ITickerMeta | null = null
 
   chartData: IChartData = {
-    minPrice: 0,
-    maxPrice: 0,
     currentPrice: null,
     cursorX: 0,
     cursorY: 0,
@@ -57,7 +53,6 @@ class Chart {
       const tickerInfo = await chartApi.getTickerMeta(ticker)
       this.setTickerMeta({ ...tickerInfo.meta, logo: tickerInfo.url })
       this.setTickerData(tickerData.values.reverse())
-      this.setMinMaxPrice()
     } catch (e) {
       this.setError('Не удалось загрузить график')
       console.log(e)
@@ -68,18 +63,6 @@ class Chart {
     this.chartData.cursorY = y
   }
 
-  setMinMaxPrice = () => {
-    const prices = this.tickerData
-      .map(value => [+value.open, +value.close])
-      .flat()
-      .sort((a, b) => a - b)
-
-    this.chartData = {
-      ...this.chartData,
-      minPrice: prices[0],
-      maxPrice: prices[prices.length - 1]
-    }
-  }
   setTickerData = (tickerData: ITickerData[]) => {
     this.tickerData = tickerData
   }
@@ -139,10 +122,6 @@ class Chart {
     setTimeout(() => {
       this.alertMessage = null
     }, timeout)
-  }
-
-  get pricesRange() {
-    return Math.abs(this.chartData.maxPrice - this.chartData.minPrice)
   }
 }
 
