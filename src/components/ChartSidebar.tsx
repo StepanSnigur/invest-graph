@@ -2,7 +2,7 @@ import React, { useContext } from 'react'
 import { observer } from 'mobx-react-lite'
 import { chart } from '../store/chart'
 import { chartConnector } from '../store/chartConnector'
-import styled from 'styled-components'
+import styled, { keyframes } from 'styled-components'
 import { ThemeContext, IAppTheme } from '../context/ThemeContext'
 
 import { FavouriteButton } from './FavouriteButton'
@@ -87,7 +87,7 @@ export const ChartSidebar = observer(() => {
 
   const { tickerData, tickerMeta, focusedCandleIdx } = chart
   if (!tickerData.length || !tickerMeta) {
-    return <h2>loading</h2>
+    return <ChartSidebarSkeleton />
   }
 
   const lastPriceIdx = tickerData.length - 1
@@ -140,3 +140,93 @@ export const ChartSidebar = observer(() => {
     </ChartSidebarWrapper>
   )
 })
+
+const skeletonAnimation = keyframes`
+  from {
+    left: -100%;
+  }
+  to {
+    left: 200%;
+  }
+`
+const TickerLogoSkeleton = styled.div`
+  position: relative;
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  margin-right: 12px;
+  background: #808080;
+  overflow: hidden;
+
+  &:before {
+    content: '';
+    position: absolute;
+    left: -100%;
+    top: -100%;
+    width: 1%;
+    height: 300%;
+    transform: rotate(45deg);
+    background: #A9A9A9;
+    box-shadow: 0 0 5px 5px #A9A9A9;
+    animation: ${skeletonAnimation} 1s ease-in-out infinite;
+  }
+`
+const TickerNameSkeleton = styled.div`
+  position: relative;
+  width: 50%;
+  height: 32px;
+  border-radius: 12px;
+  background: #808080;
+  overflow: hidden;
+
+  &:before {
+    content: '';
+    position: absolute;
+    left: -100%;
+    top: -100%;
+    width: 2%;
+    height: 300%;
+    transform: rotate(45deg);
+    background: #A9A9A9;
+    box-shadow: 0 0 15px 25px #A9A9A9;
+    animation: ${skeletonAnimation} 1s ease-in-out infinite;
+  }
+`
+const CurrentCandleInfoSkeleton = styled.div`
+  position: relative;
+  width: 100%;
+  height: 100px;
+  border-radius: 12px;
+  background: #808080;
+  margin-bottom: 15px;
+  overflow: hidden;
+  
+  &:before {
+    content: '';
+    position: absolute;
+    left: -100%;
+    top: -100%;
+    width: 2%;
+    height: 300%;
+    transform: rotate(45deg);
+    background: #A9A9A9;
+    box-shadow: 0 0 15px 25px #A9A9A9;
+    animation: ${skeletonAnimation} 1s ease-in-out infinite;
+  }
+`
+const ChartSidebarSkeleton: React.FC = () => {
+  const { colors } = useContext(ThemeContext)
+
+  return (
+    <ChartSidebarWrapper theme={colors}>
+      <div>
+        <TickerLogoWrapper>
+          <TickerLogoSkeleton />
+          <TickerNameSkeleton />
+        </TickerLogoWrapper>
+        <CurrentCandleInfoSkeleton />
+        <CurrentCandleInfoSkeleton />
+      </div>
+    </ChartSidebarWrapper>
+  )
+}
