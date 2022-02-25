@@ -10,8 +10,6 @@ import { DayPriceRange } from './DayPriceRange'
 
 const ChartSidebarWrapper = styled.div`
   width: 20%;
-  border: 2px solid ${(props: IAppTheme) => props.theme.lightButton};
-  border-radius: 8px;
   color: ${(props: IAppTheme) => props.theme.text};
   box-sizing: border-box;
   padding: 25px 15px;
@@ -22,8 +20,8 @@ const TickerLogoWrapper = styled.div`
   margin-bottom: 10px;
 `
 const TickerLogo = styled.img`
-  width: 52px;
-  height: 52px;
+  width: 64px;
+  height: 64px;
   border-radius: 12px;
   margin-right: 12px;
 `
@@ -44,7 +42,8 @@ const TickerTag = styled.span`
   margin-right: auto;
 `
 const TickerSymbol = styled.span`
-  font-size: 16px;
+  font-size: 14px;
+  opacity: .8;
 `
 const PriceSection = styled.div`
   margin-top: 40px;
@@ -102,7 +101,10 @@ export const ChartSidebar = observer(() => {
       <div>
         <TickerLogoWrapper>
           <TickerLogo src={tickerMeta.logo} alt={tickerMeta.symbol} />
-          <TickerName>{tickerMeta.name}</TickerName>
+          <div>
+            <TickerName>{tickerMeta.name}</TickerName>
+            <TickerSymbol>{tickerMeta.symbol} / {tickerMeta.exchange}</TickerSymbol>
+          </div>
           <TickerTag theme={colors}>{tickerMeta.symbol}</TickerTag>
           <FavouriteButton
             width={32}
@@ -111,7 +113,6 @@ export const ChartSidebar = observer(() => {
             onChange={addFavouriteTicker}
           />
         </TickerLogoWrapper>
-        <TickerSymbol>{tickerMeta.symbol} / {tickerMeta.exchange}</TickerSymbol>
 
         <PriceSection>
           <LastTickerPrice>

@@ -5,9 +5,16 @@ import { ThemeContext, IAppTheme } from '../context/ThemeContext'
 import { DropDown } from './DropDown'
 
 const ChartControlsWrapper = styled.div`
-  height: 4%;
+  height: 6%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 12px;
+`
+const ButtonsBlock = styled.div`
   display: flex;
   align-items: center;
+  height: 100%;
 `
 const ControlButton = styled.button`
   height: 80%;
@@ -19,9 +26,18 @@ const ControlButton = styled.button`
   color: ${(props: IAppTheme) => props.theme.text};
   cursor: pointer;
 `
+const ChartInput = styled.input`
+  height: 80%;
+  background: ${(props: IAppTheme) => props.theme.button};
+  color: ${(props: IAppTheme) => props.theme.text};
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  padding: 0 10px;
+`
 
 export const ChartControls = () => {
-  const themeContext = useContext(ThemeContext)
+  const { colors } = useContext(ThemeContext)
 
   const testOptions = [
     { name: 'test1', onPress: (val: string) => console.log(val) },
@@ -32,9 +48,12 @@ export const ChartControls = () => {
 
   return (
     <ChartControlsWrapper>
-      <ControlButton theme={themeContext.colors}>test</ControlButton>
-      <ControlButton theme={themeContext.colors}>test</ControlButton>
-      <ControlButton theme={themeContext.colors}>test</ControlButton>
+      <ButtonsBlock>
+        <ControlButton theme={colors}>test</ControlButton>
+        <ControlButton theme={colors}>test</ControlButton>
+        <ControlButton theme={colors}>test</ControlButton>
+      </ButtonsBlock>
+      <ChartInput placeholder="Введите тикер" theme={colors} />
       <DropDown title="test" options={testOptions} showIcon={true} />
     </ChartControlsWrapper>
   )

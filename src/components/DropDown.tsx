@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react'
+import React, { useState, useContext, useRef } from 'react'
 import styled from 'styled-components'
 import { IAppTheme, ThemeContext } from '../context/ThemeContext'
 
@@ -37,6 +37,7 @@ const DropDownOptionsBackground = styled.div`
   height: 200%;
 `
 const DropDownOptionsWrapper = styled.div`
+  box-sizing: border-box;
   position: absolute;
   left: 0;
   padding: 6px;
@@ -46,6 +47,7 @@ const DropDownOptionsWrapper = styled.div`
   flex-direction: column;
   background: ${(props: IAppTheme) => props.theme.button};
   color: ${(props: IAppTheme) => props.theme.text};
+  overflow: hidden;
 `
 const DropDownOption = styled.button`
   padding: 7px 0;
@@ -67,6 +69,12 @@ const DropDownOption = styled.button`
   }
 `
 
+interface DropDownIntersections {
+  top: boolean,
+  left: boolean,
+  right: boolean,
+  bottom: boolean,
+}
 interface IOption {
   name: string
   onPress:(value: string) => void
@@ -79,7 +87,33 @@ interface IDropDown {
 export const DropDown: React.FC<IDropDown> = ({ title, options, showIcon = false }) => {
   const [isOpen, setIsOpen] = useState(false)
   const themeContext = useContext(ThemeContext)
+  const dropDownRef = useRef<HTMLDivElement | null>(null)
 
+  const isDropDownVisible = (): DropDownIntersections | null => {
+    if (dropDownRef.current) {
+      const measures = dropDownRef.current.getBoundingClientRect()
+      return {
+        top: measures.top >= 0,
+        left: measures.left >= 0,
+        bottom: measures.bottom <= window.innerHeight,
+        right: measures.right <= window.innerWidth,
+      } as DropDownIntersections
+    }
+    return null
+  }
+  const handleDropDownToggle = () => {
+    if (!isOpen && dropDownRef.current) {
+      const intersections = isDropDownVisible()
+
+      // if element intersects right view border, move it to the left
+      if (intersections && !intersections.right) {
+        dropDownRef.current.style.left = 'auto'
+        dropDownRef.current.style.right = '0px'
+      }
+    }
+
+    setIsOpen(!isOpen)
+  }
   const handleDropDownClose = () => {
     setIsOpen(false)
   }
@@ -89,7 +123,7 @@ export const DropDown: React.FC<IDropDown> = ({ title, options, showIcon = false
       {isOpen ? <DropDownOptionsBackground onClick={handleDropDownClose} /> : null}
       <DropDownWrapper>
         <DropDownButton
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={handleDropDownToggle}
           showIcon={showIcon}
           theme={themeContext.colors}
         >
@@ -98,7 +132,15 @@ export const DropDown: React.FC<IDropDown> = ({ title, options, showIcon = false
             ? <DropDownIndicator isOpen={isOpen}>&#129171;</DropDownIndicator>
             : null}
         </DropDownButton>
-        {isOpen ? <DropDownOptionsWrapper theme={themeContext.colors}>
+        <DropDownOptionsWrapper
+          theme={themeContext.colors}
+          ref={dropDownRef}
+          style={{
+            height: isOpen ? 'auto' : 0,
+            padding: isOpen ? '6px' : 0,
+            marginTop: isOpen ? '6px' : 0,
+          }}
+        >
           {options.map((option, i) => (
             <DropDownOption
               key={i}
@@ -109,7 +151,7 @@ export const DropDown: React.FC<IDropDown> = ({ title, options, showIcon = false
               theme={themeContext.colors}
             >{option.name}</DropDownOption>
           ))}
-        </DropDownOptionsWrapper> : null}
+        </DropDownOptionsWrapper>
       </DropDownWrapper>
     </>
   )

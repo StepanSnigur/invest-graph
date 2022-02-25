@@ -9,10 +9,9 @@ import { ChartPrices as PricesChart } from '../canvas/ChartPrices'
 
 const PricesCanvas = styled.canvas`
   background: ${(props: IAppTheme) => props.theme.secondaryBackground};
-  border: 2px solid ${(props: IAppTheme) => props.theme.lightButton};
-  border-left: none;
-  border-top-right-radius: 8px;
-  border-bottom-right-radius: 8px;
+  border-top-right-radius: 12px;
+  border-bottom-right-radius: 12px;
+  border: 1px solid ${(props: IAppTheme) => props.theme.lightButton};
 `
 
 interface IChartPrices {
