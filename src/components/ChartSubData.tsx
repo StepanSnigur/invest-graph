@@ -2,7 +2,7 @@ import React from 'react'
 import styled from 'styled-components'
 
 const ChartSubDataWrapper = styled.div`
-  height: 16%;
+  height: 14%;
 `
 
 export const ChartSubData = () => {

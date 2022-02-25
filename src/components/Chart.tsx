@@ -15,9 +15,9 @@ const ChartWrapper = styled.div`
 `
 const ChartCanvas = styled.canvas`
   background: ${(props: IAppTheme) => props.theme.secondaryBackground};
-  border: 2px solid ${(props: IAppTheme) => props.theme.lightButton};
-  border-top-left-radius: 8px;
-  border-bottom-left-radius: 8px;
+  border: 1px solid ${(props: IAppTheme) => props.theme.lightButton};
+  border-top-left-radius: 12px;
+  border-bottom-left-radius: 12px;
 `
 
 interface IChart {
