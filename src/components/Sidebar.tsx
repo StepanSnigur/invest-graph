@@ -2,7 +2,7 @@ import React from 'react'
 import styled from 'styled-components'
 
 const SidebarWrapper = styled.div`
-  width: 3%;
+  width: 5%;
   display: flex;
   flex-direction: column;
   justify-content: space-around;

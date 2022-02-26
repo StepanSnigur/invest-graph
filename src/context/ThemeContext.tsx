@@ -16,10 +16,10 @@ export type IAppTheme = {
 }
 const DEFAULT_THEME_COLORS = {
   dark: {
-    mainBackground: '#1d1e20' ,
-    secondaryBackground: '#1a1a24',
-    button: '#303b51',
-    lightButton: '#7c96af',
+    mainBackground: '#2a263d' ,
+    secondaryBackground: '#141431',
+    button: '#3b3853',
+    lightButton: '#26264f',
     text: '#dcdccc',
     darkText: '#0f181f',
     stockUp: '#00bfa5',

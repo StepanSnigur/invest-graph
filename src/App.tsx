@@ -11,8 +11,7 @@ import { Main } from './pages/Main'
 import { Graph } from './pages/Graph'
 
 const MainWrapper = styled.div`
-  background: ${({ theme }: IAppTheme) =>
-          `linear-gradient(90deg, ${theme.mainBackground}, ${theme.secondaryBackground})`};
+  background: ${({ theme }: IAppTheme) => theme.mainBackground};
   min-height: 100vh;
 `
 
