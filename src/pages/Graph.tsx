@@ -1,5 +1,6 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import styled from 'styled-components'
+import { ThemeContext } from '../context/ThemeContext'
 
 import { Sidebar } from '../components/Sidebar'
 import { ChartControls } from '../components/ChartControls'
@@ -11,7 +12,7 @@ import appLogo from '../assets/images/logo.png'
 import homeIcon from '../assets/images/home-icon.png'
 import searchIcon from '../assets/images/search-icon.png'
 import shareIcon from '../assets/images/share-icon.png'
-import watchlistIcon from '../assets/images/watchlist-icon.png'
+import watchListIcon from '../assets/images/watchList-icon.png'
 import pencilIcon from '../assets/images/pencil-icon.png'
 import measureIcon from '../assets/images/measure-icon.png'
 import binIcon from '../assets/images/bin-icon.png'
@@ -26,7 +27,7 @@ const ChartPage = styled.div`
 `
 const GraphWrapper = styled.div`
   height: 100vh;
-  width: 97%;
+  width: 95%;
 `
 const ChartContentWrapper = styled.div`
   display: flex;
@@ -38,6 +39,12 @@ interface IGraph {
   id: string
 }
 export const Graph: React.FC<IGraph> = ({ id }) => {
+  const themeContext = useContext(ThemeContext)
+
+  const handleChangeTheme = () => {
+    themeContext.setDarkTheme(!themeContext.darkTheme)
+  }
+
   const sidebarButtons = [
     {background: 'inherit', buttons: [
       { background: '#7739FE', icon: appLogo, onClick: () => console.log('logo') },
@@ -48,7 +55,7 @@ export const Graph: React.FC<IGraph> = ({ id }) => {
       buttons: [
         { background: '#f4378b', icon: searchIcon, onClick: () => console.log('search') },
         { background: '#f4378b', icon: shareIcon, onClick: () => console.log('share') },
-        { background: '#f4378b', icon: watchlistIcon, onClick: () => console.log('watchlist') },
+        { background: '#f4378b', icon: watchListIcon, onClick: () => console.log('watchList') },
       ],
     },
     {
@@ -62,7 +69,11 @@ export const Graph: React.FC<IGraph> = ({ id }) => {
       ],
     },
     {background: 'inherit', buttons: [
-      { background: '#7739FE', icon: moonIcon, onClick: () => console.log('theme') },
+      {
+        background: '#7739FE',
+        icon: themeContext.darkTheme ? moonIcon : sunIcon,
+        onClick: handleChangeTheme,
+      },
       { background: '#7739FE', icon: settingsIcon, onClick: () => console.log('settings') },
     ]},
   ]
