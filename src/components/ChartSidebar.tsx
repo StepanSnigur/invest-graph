@@ -104,14 +104,6 @@ const TickerInfoCard = styled.div`
     opacity: .6;
   }
 `
-const CurrentCandleInfo = styled.div`
-  display: flex;
-  flex-direction: column;
-  font-size: 12px;
-  margin-bottom: 40px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid #808080;
-`
 
 export const ChartSidebar = observer(() => {
   const { colors } = useContext(ThemeContext)
@@ -120,7 +112,7 @@ export const ChartSidebar = observer(() => {
     console.log('favourite')
   }
 
-  const { tickerData, tickerMeta, focusedCandleIdx } = chart
+  const { tickerData, tickerMeta } = chart
   if (!tickerData.length || !tickerMeta) {
     return <ChartSidebarSkeleton />
   }
@@ -129,7 +121,6 @@ export const ChartSidebar = observer(() => {
   const oldPrice = +tickerData[0].open
   const lastPrice = +tickerData[lastPriceIdx].close
 
-  const currentCandle = tickerData[focusedCandleIdx ?? lastPriceIdx]
   const priceDelta = Math.abs(lastPrice - oldPrice) / lastPrice * 100
   const isGoingUp = lastPrice > oldPrice
   return (
@@ -212,12 +203,6 @@ export const ChartSidebar = observer(() => {
             </div>
           </TickerInfoCard>
         </TickerInfoWrapper>
-        {/* <CurrentCandleInfo>
-          <span>МАКС {currentCandle?.high}</span>
-          <span>МИН {currentCandle?.low}</span>
-          <span>ОТКР {currentCandle?.open}</span>
-          <span>ЗАКР {currentCandle?.close}</span>
-        </CurrentCandleInfo> */}
       </div>
     </ChartSidebarWrapper>
   )
