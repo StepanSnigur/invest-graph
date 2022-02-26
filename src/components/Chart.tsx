@@ -8,10 +8,22 @@ import { chart } from '../store/chart'
 import { Chart as ChartLibrary } from '../canvas/ChartLibrary'
 
 const ChartWrapper = styled.div`
+  position: relative;
   display: flex;
   box-sizing: border-box;
   width: 80%;
   height: 100%;
+`
+const CandleInfo = styled.div`
+  position: absolute;
+  top: 7px;
+  left: 7px;
+  background: ${(props: IAppTheme) => props.theme.button};
+  padding: 6px 8px;
+  border-radius: 8px;
+  font-size: 14px;
+  color: ${(props: IAppTheme) => props.theme.text};
+  opacity: .8;
 `
 const ChartCanvas = styled.canvas`
   background: ${(props: IAppTheme) => props.theme.secondaryBackground};
@@ -130,6 +142,7 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
     chartLibrary?.showErrorMessage(error)
   }
 
+  const currentCandle = chart.tickerData[chart.focusedCandleIdx ?? chart.tickerData.length - 1]
   return (
     <ChartWrapper ref={chartWrapperRef}>
       <ChartCanvas
@@ -148,6 +161,9 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
         width={canvasSize.width / 16}
         height={canvasSize.height}
       />
+      {chart.focusedCandleIdx ? <CandleInfo theme={colors}>
+        МАКС {currentCandle?.high} | МИН {currentCandle?.low} | ОТКР {currentCandle?.open} | ЗАКР {currentCandle?.close}
+      </CandleInfo> : null}
     </ChartWrapper>
   )
 })
