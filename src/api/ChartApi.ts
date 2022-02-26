@@ -12,6 +12,30 @@ class ChartApi extends ApiConfig{
       `time_series?symbol=${ticker}&end_date=${endDate}&outputsize=${candlesCount}&interval=1min`
     )
   }
+  getTickerIndicators = async (ticker: string, indicators: string[]) => {
+    const indicatorsData = indicators.map(async indicator => {
+      return await this.makeRequest(
+        `${indicator}?symbol=${ticker}&interval=1min`
+      )
+    })
+    const indicatorsValues = await Promise.all(indicatorsData)
+
+    const result: {
+      [key: typeof indicators[number]]: number 
+    } = {}
+    indicators.forEach((indicator, i) => {
+      const lastData = indicatorsValues[i].values[0]
+      result[indicator]= lastData[indicator]
+    })
+    
+    
+    return result
+  }
+  getTickerStatistics = async (ticker: string) => {
+    return await this.makeRequest(
+      `statistics?symbol=${ticker}`
+    )
+  }
 }
 
 const chartApi = new ChartApi()

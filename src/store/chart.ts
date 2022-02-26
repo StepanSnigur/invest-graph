@@ -23,10 +23,30 @@ export interface IChartData {
   offsetX: number,
   prevOffsetX: number,
 }
+interface IChartIndicators {
+  [key: string]: number | null,
+}
+interface ITickerStatistics {
+  valuations_metrics: {
+    market_capitalization: number,
+    forward_pe: number,
+    peg_ratio: number,
+  },
+  dividends_and_splits: {
+    dividend_date: string,
+    trailing_annual_dividend_rate: number,
+  }
+}
 
 class Chart {
   tickerData: ITickerData[] = []
   tickerMeta: ITickerMeta | null = null
+  tickerIndicators: IChartIndicators = {
+    macd: null,
+    rsi: null,
+    adx: null,
+  }
+  tickerStatistics: ITickerStatistics | null = null
 
   chartData: IChartData = {
     currentPrice: null,
@@ -51,8 +71,13 @@ class Chart {
     try {
       const tickerData = await chartApi.getChart(ticker)
       const tickerInfo = await chartApi.getTickerMeta(ticker)
+      const tickerIndicators = await chartApi.getTickerIndicators(ticker, Object.keys(this.tickerIndicators))
+      const tickerStatistics = await chartApi.getTickerStatistics(ticker)
+
       this.setTickerMeta({ ...tickerInfo.meta, logo: tickerInfo.url })
       this.setTickerData(tickerData.values.reverse())
+      this.setTickerIndicators(tickerIndicators)
+      this.setTickerStatistics(tickerStatistics.statistics)
     } catch (e) {
       this.setError('Не удалось загрузить график')
       console.log(e)
@@ -71,6 +96,13 @@ class Chart {
   }
   setTickerMeta = (tickerMeta: ITickerMeta) => {
     this.tickerMeta = tickerMeta
+  }
+  setTickerIndicators = (data: IChartIndicators) => {
+    this.tickerIndicators = data
+  }
+  setTickerStatistics = (data: ITickerStatistics) => {
+    console.log(data)
+    this.tickerStatistics = data
   }
   setError = (error: string) => {
     this.error = error

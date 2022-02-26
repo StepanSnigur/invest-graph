@@ -22,8 +22,8 @@ const SidebarButton = styled.button`
   justify-content: center;
   align-items: center;
   background: inherit;
-  width: 2vw;
-  height: 2vw;
+  width: 2.7vw;
+  height: 2.7vw;
   border-radius: 50%;
   border: none;
   cursor: pointer;

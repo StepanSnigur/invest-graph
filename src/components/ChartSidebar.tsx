@@ -52,9 +52,10 @@ const TickerSymbol = styled.span`
 `
 const PriceSection = styled.div`
   margin-top: 40px;
-  margin-bottom: 12px;
+  margin-bottom: 24px;
   height: 40px;
   display: flex;
+  justify-content: space-between;
   align-items: center;
 `
 const PriceCurrency = styled.span`
@@ -164,44 +165,30 @@ export const ChartSidebar = observer(() => {
             <img src={capitalizationIcon} alt="Капитализация" />
             <div>
               <span>Капитализация</span>
-              <span>5298734568$</span>
+              <span>{chart.tickerStatistics?.valuations_metrics.market_capitalization || '-'}$</span>
             </div>
           </TickerInfoCard>
           <TickerInfoCard>
             <img src={dividendsIcon} alt="Дивиденды" />
             <div>
-              <span>Дивиденды (10.11.22)</span>
-              <span>3423$</span>
+              <span>Дивиденды <br /> {chart.tickerStatistics?.dividends_and_splits.dividend_date}</span>
+              <span>{chart.tickerStatistics?.dividends_and_splits.trailing_annual_dividend_rate || '-'}%</span>
             </div>
           </TickerInfoCard>
           <TickerInfoCard>
             <img src={volumeIcon} alt="Количество проторгованных акций" />
             <div>
               <span>Volume</span>
-              <span>2817</span>
+              <span>{tickerData[tickerData.length - 1].volume}</span>
             </div>
           </TickerInfoCard>
-          <TickerInfoCard>
-            <img src={volumeIcon} alt="Количество проторгованных акций" />
+          {Object.keys(chart.tickerIndicators).map((indicator, i) => <TickerInfoCard key={i}>
+            <img src={researchIcon} alt={indicator} />
             <div>
-              <span>Average volume</span>
-              <span>28617</span>
+              <span>{indicator.toUpperCase()}</span>
+              <span>{chart.tickerIndicators[indicator]}</span>
             </div>
-          </TickerInfoCard>
-          <TickerInfoCard>
-            <img src={researchIcon} alt="P/E" />
-            <div>
-              <span>P/E</span>
-              <span>28617</span>
-            </div>
-          </TickerInfoCard>
-          <TickerInfoCard>
-            <img src={researchIcon} alt="EPS" />
-            <div>
-              <span>EPX</span>
-              <span>28617</span>
-            </div>
-          </TickerInfoCard>
+          </TickerInfoCard>)}
         </TickerInfoWrapper>
       </div>
     </ChartSidebarWrapper>
