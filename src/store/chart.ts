@@ -1,5 +1,6 @@
 import { makeAutoObservable, runInAction } from 'mobx'
 import { chartApi } from '../api/ChartApi'
+import { ICoordinates, IDrawingFunctions } from '../canvas/DrawingLibrary'
 
 export interface ITickerData {
   datetime: string,
@@ -37,6 +38,17 @@ interface ITickerStatistics {
     trailing_annual_dividend_rate: number,
   }
 }
+export interface IChartDrawing {
+  from: {
+    x: number,
+    y: number,
+  },
+  to: {
+    x: number | null,
+    y: number | null,
+  },
+  drawFunction: IDrawingFunctions,
+}
 
 class Chart {
   tickerData: ITickerData[] = []
@@ -58,10 +70,13 @@ class Chart {
   focusedCandleIdx: null | number = null
   error: string | false = false
   alertMessage: string | null = null
-  // TODO
+  
   chartSettings = {
     maxCandlesOnScreenCount: 150
   }
+  chartDrawings: IChartDrawing[] = []
+  isInDrawingMode: IDrawingFunctions | false = false
+  drawIndex: number | null = null
 
   constructor() {
     makeAutoObservable(this)
@@ -70,14 +85,14 @@ class Chart {
   loadChart = async (ticker: string) => {
     try {
       const tickerData = await chartApi.getChart(ticker)
-      const tickerInfo = await chartApi.getTickerMeta(ticker)
-      const tickerIndicators = await chartApi.getTickerIndicators(ticker, Object.keys(this.tickerIndicators))
-      const tickerStatistics = await chartApi.getTickerStatistics(ticker)
+      // const tickerInfo = await chartApi.getTickerMeta(ticker)
+      // const tickerIndicators = await chartApi.getTickerIndicators(ticker, Object.keys(this.tickerIndicators))
+      // const tickerStatistics = await chartApi.getTickerStatistics(ticker)
 
-      this.setTickerMeta({ ...tickerInfo.meta, logo: tickerInfo.url })
+      // this.setTickerMeta({ ...tickerInfo.meta, logo: tickerInfo.url })
       this.setTickerData(tickerData.values.reverse())
-      this.setTickerIndicators(tickerIndicators)
-      this.setTickerStatistics(tickerStatistics.statistics)
+      // this.setTickerIndicators(tickerIndicators)
+      // this.setTickerStatistics(tickerStatistics.statistics)
     } catch (e) {
       this.setError('Не удалось загрузить график')
       console.log(e)
@@ -148,11 +163,26 @@ class Chart {
     return await chartApi.getNewChartCandles(this.tickerMeta.symbol, candlesCount, endDate)
   }
 
+  setIsInDrawingMode = (isInDrawingMode: IDrawingFunctions | false) => {
+    this.isInDrawingMode = isInDrawingMode
+  }
+  addChartDrawing = (drawing: IChartDrawing) => {
+    this.chartDrawings.push(drawing)
+  }
+  changeLastDrawingPosition = (to: ICoordinates) => {
+    this.chartDrawings[this.chartDrawings.length - 1].to = to
+  }
+  setDrawIndex = (drawIndex: number | null) => {
+    this.drawIndex = drawIndex
+  }
+
   showAlertMessage = (message: string, timeout: number = 3000) => {
     this.alertMessage = message
 
     setTimeout(() => {
-      this.alertMessage = null
+      runInAction(() => {
+        this.alertMessage = null
+      })
     }, timeout)
   }
 }

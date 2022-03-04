@@ -18,6 +18,7 @@ const ButtonsBlock = styled.div`
   border-radius: calc(2vw / 2);
 `
 const SidebarButton = styled.button`
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -41,11 +42,22 @@ const ButtonIcon = styled.img`
   width: 24px;
   height: 24px;
 `
+const ActiveIndicator = styled.div`
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background:#000;
+`
 
 interface ISidebarButton {
   icon: string,
   background: string,
   onClick: () => void,
+  isActive?: boolean,
 }
 interface IButtonsBlocks {
   background: string,
@@ -64,6 +76,7 @@ export const Sidebar: React.FC<ISidebar> = ({ buttonsBlocks }) => {
           key={j}
         >
           <ButtonIcon src={button.icon} alt="button"/>
+          {button.isActive ? <ActiveIndicator /> : null}
         </SidebarButton>)}
       </ButtonsBlock>)}
     </SidebarWrapper>

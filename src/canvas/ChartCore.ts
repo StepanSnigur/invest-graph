@@ -34,7 +34,7 @@ class ChartCore extends CanvasUtils {
     this.ctx = ctx
   }
 
-  protected setChartColors = (colors: IThemeColors) => {
+  public setChartColors = (colors: IThemeColors) => {
     this.settings.colors = colors
   }
   protected clearCanvas = () => {
@@ -46,6 +46,10 @@ class ChartCore extends CanvasUtils {
     const scaledPosition = (this.sizes.height - (this.sizes.height / 100 * percentPosition)) * this.settings.scaleY
     const scaledHeight = (this.sizes.height - this.sizes.height * this.settings.scaleY) / 2
     return scaledPosition + scaledHeight
+  }
+
+  public get chartColors() {
+    return this.settings.colors
   }
 }
 

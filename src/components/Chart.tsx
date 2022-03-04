@@ -6,6 +6,7 @@ import { autorun } from 'mobx'
 import { observer } from 'mobx-react-lite'
 import { chart } from '../store/chart'
 import { Chart as ChartLibrary } from '../canvas/ChartLibrary'
+import { DrawingLibrary, ICoordinates } from '../canvas/DrawingLibrary'
 
 const ChartWrapper = styled.div`
   position: relative;
@@ -44,6 +45,7 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
     height: 0,
   })
   const [chartLibrary, setChartLibrary] = useState<ChartLibrary | null>(null)
+  const [drawingLibrary, setDrawingLibrary] = useState<DrawingLibrary | null>(null)
   const [chartPosition, setChartPosition] = useState({
     top: 0,
     left: 0,
@@ -79,6 +81,11 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
     chartLibrary?.showPreloader()
     chartLibrary?.setMaxCandlesOnScreenCount(chart.chartSettings.maxCandlesOnScreenCount)
     setChartLibrary(chartLibrary)
+
+    const drawingLibrary = ctx ? new DrawingLibrary(canvasWidth, chartWrapperRef.current!.offsetHeight, ctx) : null
+    drawingLibrary?.setChartColors(colors)
+    setDrawingLibrary(drawingLibrary)
+
     setChartPosition({
       top,
       left,
@@ -92,7 +99,6 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
     init()
   }, [chartWrapperRef, colors, ticker])
 
-  // TODO try reaction instead of autorun
   useEffect(() => autorun(() => {
     if (chart.error) {
       onChartError(chart.error)
@@ -105,6 +111,16 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
     }
   }))
 
+  useEffect(() => autorun(() => {
+    if (chart.chartDrawings.length > 0) {
+      chart.chartDrawings.forEach(drawing => {
+        if (drawingLibrary && drawing.to.x !== null && drawing.to.y !== null) {
+          drawingLibrary[drawing.drawFunction](drawing.from, drawing.to as ICoordinates, chart.chartData.offsetX)
+        }
+      })
+    }
+  }))
+
   const handleMouseMove = (e: React.MouseEvent) => {
     const x = e.clientX - chartPosition.left
     const y = e.clientY - chartPosition.top
@@ -114,6 +130,14 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
     if (!isLoading && dragData.startX !== null) {
       const delta = e.pageX - dragData.startX
       chart.setOffsetX(delta)
+    }
+
+    if (chart.isInDrawingMode && chart.drawIndex !== null) {
+      const toY = drawingLibrary?.getCurrentPrice(y)
+      toY && chart.changeLastDrawingPosition({
+        x: x - chart.chartData.offsetX,
+        y: toY,
+      })
     }
   }
   const handleMouseLeave = () => {
@@ -133,6 +157,30 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
     })
     await chart.checkNewData(canvasSize.width)
     chart.setPrevOffsetX()
+  }
+  const handleMouseClick = () => {
+    if (chart.isInDrawingMode && chart.drawIndex !== null) {
+      chart.setIsInDrawingMode(false)
+      chart.setDrawIndex(null)
+      return false
+    }
+    if (chart.isInDrawingMode) {
+      const fromY = drawingLibrary?.getCurrentPrice(chart.chartData.cursorY)
+      if (fromY) {
+        chart.addChartDrawing({
+          from: {
+            x: chart.chartData.cursorX - chart.chartData.offsetX,
+            y: fromY,
+          },
+          to: {
+            x: null,
+            y: null,
+          },
+          drawFunction: chart.isInDrawingMode,
+        })
+        chart.setDrawIndex(chart.chartDrawings.length - 1)
+      }
+    }
   }
 
   const handleCandleFocus = (candleIdx: number) => {
@@ -154,6 +202,7 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
         onMouseLeave={handleMouseLeave}
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
+        onClick={handleMouseClick}
       >
         Браузер не поддерживает Canvas
       </ChartCanvas>
