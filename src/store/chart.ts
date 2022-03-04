@@ -85,17 +85,16 @@ class Chart {
   loadChart = async (ticker: string) => {
     try {
       const tickerData = await chartApi.getChart(ticker)
-      // const tickerInfo = await chartApi.getTickerMeta(ticker)
-      // const tickerIndicators = await chartApi.getTickerIndicators(ticker, Object.keys(this.tickerIndicators))
-      // const tickerStatistics = await chartApi.getTickerStatistics(ticker)
+      const tickerInfo = await chartApi.getTickerMeta(ticker)
+      const tickerIndicators = await chartApi.getTickerIndicators(ticker, Object.keys(this.tickerIndicators))
+      const tickerStatistics = await chartApi.getTickerStatistics(ticker)
 
-      // this.setTickerMeta({ ...tickerInfo.meta, logo: tickerInfo.url })
+      this.setTickerMeta({ ...tickerInfo.meta, logo: tickerInfo.url })
       this.setTickerData(tickerData.values.reverse())
-      // this.setTickerIndicators(tickerIndicators)
-      // this.setTickerStatistics(tickerStatistics.statistics)
+      this.setTickerIndicators(tickerIndicators)
+      this.setTickerStatistics(tickerStatistics.statistics)
     } catch (e) {
       this.setError('Не удалось загрузить график')
-      console.log(e)
     }
   }
   moveCursor = (x: number, y: number) => {
@@ -116,7 +115,6 @@ class Chart {
     this.tickerIndicators = data
   }
   setTickerStatistics = (data: ITickerStatistics) => {
-    console.log(data)
     this.tickerStatistics = data
   }
   setError = (error: string) => {
