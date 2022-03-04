@@ -1,6 +1,8 @@
 import React, { useContext } from 'react'
+import { observer } from 'mobx-react-lite'
 import styled from 'styled-components'
 import { ThemeContext } from '../context/ThemeContext'
+import { chart } from '../store/chart'
 
 import { Sidebar } from '../components/Sidebar'
 import { ChartControls } from '../components/ChartControls'
@@ -38,7 +40,7 @@ const ChartContentWrapper = styled.div`
 interface IGraph {
   id: string
 }
-export const Graph: React.FC<IGraph> = ({ id }) => {
+export const Graph: React.FC<IGraph> = observer(({ id }) => {
   const themeContext = useContext(ThemeContext)
 
   const handleChangeTheme = () => {
@@ -61,7 +63,7 @@ export const Graph: React.FC<IGraph> = ({ id }) => {
     {
       background: '#332757',
       buttons: [
-        { background: '#7739FE', icon: pencilIcon, onClick: () => console.log('draw') },
+        { background: '#7739FE', icon: pencilIcon, onClick: () => chart.setIsInDrawingMode('drawLine'), isActive: !!chart.isInDrawingMode },
         { background: '#7739FE', icon: measureIcon, onClick: () => console.log('measure') },
         { background: '#7739FE', icon: patternIcon, onClick: () => console.log('trading pattern') },
         { background: '#7739FE', icon: textIcon, onClick: () => console.log('text') },
@@ -91,4 +93,4 @@ export const Graph: React.FC<IGraph> = ({ id }) => {
       </GraphWrapper>
     </ChartPage>
   )
-}
+})
