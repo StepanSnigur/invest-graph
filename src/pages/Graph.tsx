@@ -67,7 +67,7 @@ export const Graph: React.FC<IGraph> = observer(({ id }) => {
         { background: '#7739FE', icon: measureIcon, onClick: () => console.log('measure') },
         { background: '#7739FE', icon: patternIcon, onClick: () => console.log('trading pattern') },
         { background: '#7739FE', icon: textIcon, onClick: () => console.log('text') },
-        { background: '#7739FE', icon: binIcon, onClick: () => console.log('remove') },
+        { background: '#7739FE', icon: binIcon, onClick: chart.removeAllDrawings },
       ],
     },
     {background: 'inherit', buttons: [
