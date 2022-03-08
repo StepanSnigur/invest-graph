@@ -7,6 +7,8 @@ import { observer } from 'mobx-react-lite'
 import { chart } from '../store/chart'
 import { Chart as ChartLibrary } from '../canvas/ChartLibrary'
 import { DrawingLibrary, ICoordinates } from '../canvas/DrawingLibrary'
+import { EventsManager, IEvent } from '../canvas/EventsManager'
+import { debounce } from '../utils/debounce'
 
 const ChartWrapper = styled.div`
   position: relative;
@@ -91,13 +93,34 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
       left,
     })
 
+    const debouncedDataCheck = debounce(() => chart.checkNewData(canvasSize.width), 1000)
+    const events: IEvent[] = [
+      {
+        buttons: ['x'],
+        wheelSpinning: true,
+        handler: (delta: number) => console.log(delta, 'scale'),
+      },
+      {
+        buttons: [],
+        wheelSpinning: true,
+        handler: (delta: number) => {
+          chart.setPrevOffsetX()
+          chart.setOffsetX(delta / 5)
+          debouncedDataCheck()
+        },
+      },
+    ]
+    const eventsManager = new EventsManager(chartWrapperRef.current!, events)
+
     const init = async () => {
       await chart.loadChart(ticker)
       chartLibrary?.hidePreloader()
       setIsLoading(false)
     }
     init()
-  }, [chartWrapperRef, colors, ticker])
+
+    return eventsManager.removeListeners
+  }, [chartWrapperRef, colors, ticker, canvasSize.width])
 
   useEffect(() => reaction(
     () => chart.chartDrawings,
