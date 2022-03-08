@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect, useContext } from 'react'
 import styled from 'styled-components'
 import { ThemeContext, IAppTheme } from '../context/ThemeContext'
 import { ChartPrices } from './ChartPrices'
-import { autorun } from 'mobx'
+import { autorun, reaction } from 'mobx'
 import { observer } from 'mobx-react-lite'
 import { chart } from '../store/chart'
 import { Chart as ChartLibrary } from '../canvas/ChartLibrary'
@@ -99,6 +99,18 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
     init()
   }, [chartWrapperRef, colors, ticker])
 
+  useEffect(() => reaction(
+    () => chart.chartDrawings,
+    () => {
+      // clear chart from drawings
+      if (chart.chartDrawings.length === 0) {
+        chartLibrary?.drawChart(chart.tickerData, {
+          x: chart.chartData.cursorX,
+          y: chart.chartData.cursorY,
+        }, chart.chartData.offsetX)
+      }
+    }
+  ))
   useEffect(() => autorun(() => {
     if (chart.error) {
       onChartError(chart.error)

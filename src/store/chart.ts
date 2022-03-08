@@ -173,6 +173,9 @@ class Chart {
   setDrawIndex = (drawIndex: number | null) => {
     this.drawIndex = drawIndex
   }
+  removeAllDrawings = () => {
+    this.chartDrawings = []
+  }
 
   showAlertMessage = (message: string, timeout: number = 3000) => {
     this.alertMessage = message
