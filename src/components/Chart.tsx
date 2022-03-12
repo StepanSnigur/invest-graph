@@ -5,6 +5,7 @@ import { ChartPrices } from './ChartPrices'
 import { autorun, reaction } from 'mobx'
 import { observer } from 'mobx-react-lite'
 import { chart } from '../store/chart'
+import { chartConnector } from '../store/chartConnector'
 import { Chart as ChartLibrary } from '../canvas/ChartLibrary'
 import { DrawingLibrary, ICoordinates } from '../canvas/DrawingLibrary'
 import { EventsManager, IEvent } from '../canvas/EventsManager'
@@ -61,38 +62,7 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
   const { colors } = useContext(ThemeContext)
 
   useEffect(() => {
-    setIsLoading(true)
-    const ctx = canvasRef.current!.getContext('2d')
-    const { top, left } = canvasRef.current!.getBoundingClientRect()
-    // chart width without a prices bar
-    const canvasWidth = chartWrapperRef.current!.offsetWidth - chartWrapperRef.current!.offsetWidth / 16
-
-    setCanvasSize({
-      width: canvasWidth,
-      height: chartWrapperRef.current!.offsetHeight,
-    })
-    const chartLibrary = ctx ? new ChartLibrary(
-      canvasWidth,
-      chartWrapperRef.current!.offsetHeight,
-      colors,
-      ctx,
-      {
-        onCandleFocus: handleCandleFocus
-      }
-    ) : null
-    chartLibrary?.showPreloader()
-    chartLibrary?.setMaxCandlesOnScreenCount(chart.chartSettings.maxCandlesOnScreenCount)
-    setChartLibrary(chartLibrary)
-
-    const drawingLibrary = ctx ? new DrawingLibrary(canvasWidth, chartWrapperRef.current!.offsetHeight, ctx) : null
-    drawingLibrary?.setChartColors(colors)
-    setDrawingLibrary(drawingLibrary)
-
-    setChartPosition({
-      top,
-      left,
-    })
-
+    // init event manager
     const debouncedDataCheck = debounce(() => chart.checkNewData(canvasSize.width), 1000)
     const events: IEvent[] = [
       {
@@ -109,19 +79,69 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
           debouncedDataCheck()
         },
       },
+      {
+        buttons: ['y'],
+        wheelSpinning: true,
+        handler: (delta: number) => {
+          chartConnector.setYScale(delta / 1000)
+        },
+      },
     ]
     const eventsManager = new EventsManager(chartWrapperRef.current!, events)
+
+    // draw chart
+    setIsLoading(true)
+    const ctx = canvasRef.current!.getContext('2d')
+    const { top, left } = canvasRef.current!.getBoundingClientRect()
+    // chart width without a prices bar
+    const canvasWidth = chartWrapperRef.current!.offsetWidth - chartWrapperRef.current!.offsetWidth / 16
+
+    setCanvasSize({
+      width: canvasWidth,
+      height: chartWrapperRef.current!.offsetHeight,
+    })
+    const chartLibrary = ctx ? new ChartLibrary(
+      canvasWidth,
+      chartWrapperRef.current!.offsetHeight,
+      colors,
+      ctx,
+      {
+        onCandleFocus: handleCandleFocus,
+      },
+    ) : null
+    if (canvasSize.width > 0) chartLibrary?.showPreloader()
+    chartLibrary?.setMaxCandlesOnScreenCount(chart.chartSettings.maxCandlesOnScreenCount)
+    setChartLibrary(chartLibrary)
+
+    const drawingLibrary = ctx ? new DrawingLibrary(canvasWidth, chartWrapperRef.current!.offsetHeight, ctx) : null
+    drawingLibrary?.setChartColors(colors)
+    setDrawingLibrary(drawingLibrary)
+
+    setChartPosition({
+      top,
+      left,
+    })
 
     const init = async () => {
       await chart.loadChart(ticker)
       chartLibrary?.hidePreloader()
       setIsLoading(false)
     }
-    init()
+    (canvasSize.width > 0) && init()
 
     return eventsManager.removeListeners
   }, [chartWrapperRef, colors, ticker, canvasSize.width])
 
+  useEffect(() => reaction(
+    () => chartConnector.settings.scaleY,
+    () => {
+      chartLibrary?.setChartYScale(chartConnector.settings.scaleY)
+      chartLibrary?.drawChart(chart.tickerData, {
+        x: chart.chartData.cursorX,
+        y: chart.chartData.cursorY,
+      }, chart.chartData.offsetX)
+    }
+  ))
   useEffect(() => reaction(
     () => chart.chartDrawings,
     () => {

@@ -34,6 +34,9 @@ class ChartCore extends CanvasUtils {
     this.ctx = ctx
   }
 
+  public setChartYScale = (scaleY: number) => {
+    this.settings.scaleY = scaleY
+  }
   public setChartColors = (colors: IThemeColors) => {
     this.settings.colors = colors
   }

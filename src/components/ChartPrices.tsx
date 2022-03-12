@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useContext } from 'react'
 import styled from 'styled-components'
 import { ThemeContext, IAppTheme } from '../context/ThemeContext'
-import { autorun } from 'mobx'
+import { autorun, reaction } from 'mobx'
 import { observer } from 'mobx-react-lite'
 import { chart } from '../store/chart'
 import { chartConnector } from '../store/chartConnector'
@@ -23,6 +23,12 @@ export const ChartPrices: React.FC<IChartPrices> = observer(({ width, height, })
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const { colors } = useContext(ThemeContext)
 
+  useEffect(() => reaction(
+    () => chartConnector.settings.scaleY,
+    () => {
+      pricesLibrary?.setChartYScale(chartConnector.settings.scaleY)
+    }
+  ))
   useEffect(() => autorun(() => {
     const { minChartPrice, maxChartPrice } = chartConnector.data
     if (pricesLibrary && minChartPrice && maxChartPrice) {
