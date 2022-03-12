@@ -79,7 +79,7 @@ class ChartPrices extends ChartCore {
     this.placePriceOnChart(this.pricesSettings.minPrice)
     this.placePriceOnChart(this.pricesSettings.maxPrice)
 
-    const pricesCount = Math.floor(this.sizes.height / (this.textMetrics.height + 40) - 2)
+    const pricesCount = Math.floor(this.sizes.height * this.settings.scaleY / (this.textMetrics.height * this.settings.scaleY + 40) - 2)
     new Array(pricesCount - 1).fill(null).reduce((prev) => {
       const interval = (this.pricesSettings.maxPrice - this.pricesSettings.minPrice) / pricesCount
       const curr = prev + interval

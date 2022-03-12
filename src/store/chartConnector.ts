@@ -5,6 +5,9 @@ class ChartConnector {
     minChartPrice: 0,
     maxChartPrice: 0,
   }
+  settings = {
+    scaleY: 0.9,
+  }
 
   constructor() {
     makeAutoObservable(this)
@@ -17,6 +20,13 @@ class ChartConnector {
         maxChartPrice,
       }
     })
+  }
+
+  setYScale = (scaleY: number) => {
+    const newScale = this.settings.scaleY + scaleY
+    if (newScale > 0.2 && newScale < 5) {
+      this.settings.scaleY = newScale
+    }
   }
 }
 

@@ -86,13 +86,13 @@ class Chart {
     try {
       const tickerData = await chartApi.getChart(ticker)
       const tickerInfo = await chartApi.getTickerMeta(ticker)
-      // const tickerIndicators = await chartApi.getTickerIndicators(ticker, Object.keys(this.tickerIndicators))
-      // const tickerStatistics = await chartApi.getTickerStatistics(ticker)
+      const tickerIndicators = await chartApi.getTickerIndicators(ticker, Object.keys(this.tickerIndicators))
+      const tickerStatistics = await chartApi.getTickerStatistics(ticker)
 
       this.setTickerMeta({ ...tickerInfo.meta, logo: tickerInfo.url })
       this.setTickerData(tickerData.values.reverse())
-      // this.setTickerIndicators(tickerIndicators)
-      // this.setTickerStatistics(tickerStatistics.statistics)
+      this.setTickerIndicators(tickerIndicators)
+      this.setTickerStatistics(tickerStatistics.statistics)
     } catch (e) {
       this.setError('Не удалось загрузить график')
     }
@@ -135,6 +135,9 @@ class Chart {
   // normalize offsetX after pushing elements in the array
   normalizeOffsetX = (shift: number) => {
     this.chartData.offsetX = this.chartData.offsetX - shift
+  }
+  setChartScale = (delta: number) => {
+    console.log(delta)
   }
 
   checkNewData = async (canvasWidth: number) => {
