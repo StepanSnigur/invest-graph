@@ -78,6 +78,7 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
         wheelSpinning: true,
         handler: (delta: number) => {
           chart.setPrevOffsetX()
+          chart.setPrevDrawingsOffsetX()
           chart.setOffsetX(delta / 5)
           debouncedDataCheck()
         },
@@ -183,7 +184,7 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
     if (chart.chartDrawings.length > 0) {
       chart.chartDrawings.forEach(drawing => {
         if (drawingLibrary && drawing.to.x !== null && drawing.to.y !== null) {
-          drawingLibrary[drawing.drawFunction](drawing.from, drawing.to as ICoordinates, chart.chartData.offsetX)
+          drawingLibrary[drawing.drawFunction](drawing.from, drawing.to as ICoordinates, chart.chartData.drawingsOffsetX)
         }
       })
     }
@@ -203,7 +204,7 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
     if (chart.isInDrawingMode && chart.drawIndex !== null) {
       const toY = drawingLibrary?.getCurrentPrice(y)
       toY && chart.changeLastDrawingPosition({
-        x: x - chart.chartData.offsetX,
+        x: x - chart.chartData.drawingsOffsetX,
         y: toY,
       })
     }
@@ -225,6 +226,7 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
     })
     await chart.checkNewData(canvasSize.width)
     chart.setPrevOffsetX()
+    chart.setPrevDrawingsOffsetX()
   }
   const handleMouseClick = () => {
     if (chart.isInDrawingMode && chart.drawIndex !== null) {
@@ -237,7 +239,7 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
       if (fromY) {
         chart.addChartDrawing({
           from: {
-            x: chart.chartData.cursorX - chart.chartData.offsetX,
+            x: chart.chartData.cursorX - chart.chartData.drawingsOffsetX,
             y: fromY,
           },
           to: {
