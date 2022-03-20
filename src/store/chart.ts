@@ -84,7 +84,7 @@ class Chart {
 
   loadChart = async (ticker: string) => {
     try {
-      const tickerData = await chartApi.getChart(ticker)
+      const tickerData = await chartApi.getChart(ticker, this.chartSettings.maxCandlesOnScreenCount)
       const tickerInfo = await chartApi.getTickerMeta(ticker)
       const tickerIndicators = await chartApi.getTickerIndicators(ticker, Object.keys(this.tickerIndicators))
       const tickerStatistics = await chartApi.getTickerStatistics(ticker)
@@ -178,6 +178,9 @@ class Chart {
   }
   removeAllDrawings = () => {
     this.chartDrawings = []
+  }
+  setMaxCandlesOnScreenCount = (count: number) => {
+    this.chartSettings.maxCandlesOnScreenCount += count
   }
 
   showAlertMessage = (message: string, timeout: number = 3000) => {
