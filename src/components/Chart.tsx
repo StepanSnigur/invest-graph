@@ -65,12 +65,15 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
     // init event manager
     const debouncedDataCheck = debounce(() => chart.checkNewData(canvasSize.width), 1000)
     const events: IEvent[] = [
-      {
+      { // resize by x
         buttons: ['x'],
         wheelSpinning: true,
-        handler: (delta: number) => console.log(delta, 'scale'),
+        handler: (delta: number) => {
+          chart.setMaxCandlesOnScreenCount(delta / 10)
+          chart.checkNewData(canvasSize.width)
+        },
       },
-      {
+      { // scroll
         buttons: [],
         wheelSpinning: true,
         handler: (delta: number) => {
@@ -79,7 +82,7 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
           debouncedDataCheck()
         },
       },
-      {
+      { // resize by y
         buttons: ['y'],
         wheelSpinning: true,
         handler: (delta: number) => {
@@ -136,6 +139,7 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
     () => chartConnector.settings.scaleY,
     () => {
       chartLibrary?.setChartYScale(chartConnector.settings.scaleY)
+      drawingLibrary?.setChartYScale(chartConnector.settings.scaleY)
       chartLibrary?.drawChart(chart.tickerData, {
         x: chart.chartData.cursorX,
         y: chart.chartData.cursorY,
@@ -143,9 +147,18 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
     }
   ))
   useEffect(() => reaction(
+    () => chart.chartSettings.maxCandlesOnScreenCount,
+    () => {
+      chartLibrary?.setMaxCandlesOnScreenCount(chart.chartSettings.maxCandlesOnScreenCount)
+      chartLibrary?.drawChart(chart.tickerData, {
+        x: chart.chartData.cursorX,
+        y: chart.chartData.cursorY,
+      }, chart.chartData.offsetX)
+    }
+  ))
+  useEffect(() => reaction( // clear chart from drawings
     () => chart.chartDrawings,
     () => {
-      // clear chart from drawings
       if (chart.chartDrawings.length === 0) {
         chartLibrary?.drawChart(chart.tickerData, {
           x: chart.chartData.cursorX,
