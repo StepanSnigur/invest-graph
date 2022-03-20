@@ -173,7 +173,11 @@ class Chart {
   }
 
   setIsInDrawingMode = (isInDrawingMode: IDrawingFunctions | false) => {
-    this.isInDrawingMode = isInDrawingMode
+    if (isInDrawingMode === this.isInDrawingMode) {
+      this.isInDrawingMode = false
+    } else {
+      this.isInDrawingMode = isInDrawingMode
+    }
   }
   addChartDrawing = (drawing: IChartDrawing) => {
     this.chartDrawings.push(drawing)
