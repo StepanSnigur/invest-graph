@@ -23,6 +23,8 @@ export interface IChartData {
   cursorY: number,
   offsetX: number,
   prevOffsetX: number,
+  drawingsOffsetX: number,
+  prevDrawingsOffsetX: number,
 }
 interface IChartIndicators {
   [key: string]: number | null,
@@ -66,6 +68,8 @@ class Chart {
     cursorY: 0,
     offsetX: 0,
     prevOffsetX: 0,
+    drawingsOffsetX: 0,
+    prevDrawingsOffsetX: 0,
   }
   focusedCandleIdx: null | number = null
   error: string | false = false
@@ -128,9 +132,13 @@ class Chart {
 
   setOffsetX = (offsetX: number) => {
     this.chartData.offsetX = this.chartData.prevOffsetX + offsetX
+    this.chartData.drawingsOffsetX = this.chartData.prevDrawingsOffsetX + offsetX
   }
   setPrevOffsetX = () => {
     this.chartData.prevOffsetX = this.chartData.offsetX
+  }
+  setPrevDrawingsOffsetX = () => {
+    this.chartData.prevDrawingsOffsetX = this.chartData.drawingsOffsetX
   }
   // normalize offsetX after pushing elements in the array
   normalizeOffsetX = (shift: number) => {
@@ -149,10 +157,10 @@ class Chart {
         const newChartCandles = await this.getNewChartCandles(columnsToGet, this.tickerData[0].datetime)
         this.appendCandlesToStart(newChartCandles.values.reverse())
 
-        // TODO move it inside a hook
         const screenShift = columnWidth * columnsToGet
         this.normalizeOffsetX(screenShift)
         this.setPrevOffsetX()
+        this.setPrevDrawingsOffsetX()
       }
     } catch (e) {
       this.showAlertMessage('Ошибка при загрузке данных')
