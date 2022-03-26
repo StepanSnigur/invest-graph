@@ -1,6 +1,7 @@
-import { makeAutoObservable, runInAction } from 'mobx'
+import { makeAutoObservable, runInAction, observe } from 'mobx'
 import { chartApi } from '../api/ChartApi'
 import { ICoordinates, IDrawingFunctions } from '../canvas/DrawingLibrary'
+import { settingsSaver } from '../utils/settingsSaver'
 
 export interface ITickerData {
   datetime: string,
@@ -40,6 +41,10 @@ interface ITickerStatistics {
     trailing_annual_dividend_rate: number,
   }
 }
+export interface IChartSettings {
+  maxCandlesOnScreenCount: number,
+  scaleY: number,
+}
 export interface IChartDrawing {
   from: {
     x: number,
@@ -75,8 +80,9 @@ class Chart {
   error: string | false = false
   alertMessage: string | null = null
   
-  chartSettings = {
-    maxCandlesOnScreenCount: 150
+  chartSettings: IChartSettings = {
+    maxCandlesOnScreenCount: 150,
+    scaleY: 0.9,
   }
   chartDrawings: IChartDrawing[] = []
   isInDrawingMode: IDrawingFunctions | false = false
@@ -84,6 +90,9 @@ class Chart {
 
   constructor() {
     makeAutoObservable(this)
+
+    const settings = settingsSaver.checkDefaultSettings()
+    this.chartSettings = settings
   }
 
   loadChart = async (ticker: string) => {
@@ -144,9 +153,6 @@ class Chart {
   normalizeOffsetX = (shift: number) => {
     this.chartData.offsetX = this.chartData.offsetX - shift
   }
-  setChartScale = (delta: number) => {
-    console.log(delta)
-  }
 
   checkNewData = async (canvasWidth: number) => {
     try {
@@ -191,8 +197,15 @@ class Chart {
   removeAllDrawings = () => {
     this.chartDrawings = []
   }
+
   setMaxCandlesOnScreenCount = (count: number) => {
     this.chartSettings.maxCandlesOnScreenCount += count
+  }
+  setYScale = (scaleY: number) => {
+    const newScale = this.chartSettings.scaleY + scaleY
+    if (newScale > 0.2 && newScale < 5) {
+      this.chartSettings.scaleY = newScale
+    }
   }
 
   showAlertMessage = (message: string, timeout: number = 3000) => {
@@ -207,6 +220,13 @@ class Chart {
 }
 
 const chart = new Chart()
+
+observe(chart.chartSettings, (change) => {
+  if (change.type === 'update') {
+    settingsSaver.changeField(change.name.toString(), change.newValue)
+  }
+})
+
 export {
   chart
 }

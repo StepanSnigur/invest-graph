@@ -24,9 +24,9 @@ export const ChartPrices: React.FC<IChartPrices> = observer(({ width, height, })
   const { colors } = useContext(ThemeContext)
 
   useEffect(() => reaction(
-    () => chartConnector.settings.scaleY,
+    () => chart.chartSettings.scaleY,
     () => {
-      pricesLibrary?.setChartYScale(chartConnector.settings.scaleY)
+      pricesLibrary?.setChartYScale(chart.chartSettings.scaleY)
     }
   ))
   useEffect(() => autorun(() => {
@@ -46,6 +46,7 @@ export const ChartPrices: React.FC<IChartPrices> = observer(({ width, height, })
 
       if (ctx) {
         const pricesLibrary = new PricesChart(width, height, colors, ctx)
+        pricesLibrary?.setChartYScale(chart.chartSettings.scaleY)
         pricesLibrary.drawChart()
         setPricesLibrary(pricesLibrary)
 

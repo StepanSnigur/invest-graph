@@ -5,7 +5,6 @@ import { ChartPrices } from './ChartPrices'
 import { autorun, reaction } from 'mobx'
 import { observer } from 'mobx-react-lite'
 import { chart } from '../store/chart'
-import { chartConnector } from '../store/chartConnector'
 import { Chart as ChartLibrary } from '../canvas/ChartLibrary'
 import { DrawingLibrary, ICoordinates } from '../canvas/DrawingLibrary'
 import { EventsManager, IEvent } from '../canvas/EventsManager'
@@ -87,7 +86,7 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
         buttons: ['y'],
         wheelSpinning: true,
         handler: (delta: number) => {
-          chartConnector.setYScale(delta / 1000)
+          chart.setYScale(delta / 1000)
         },
       },
     ]
@@ -114,7 +113,6 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
       },
     ) : null
     if (canvasSize.width > 0) chartLibrary?.showPreloader()
-    chartLibrary?.setMaxCandlesOnScreenCount(chart.chartSettings.maxCandlesOnScreenCount)
     setChartLibrary(chartLibrary)
 
     const drawingLibrary = ctx ? new DrawingLibrary(canvasWidth, chartWrapperRef.current!.offsetHeight, ctx) : null
@@ -127,6 +125,10 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
     })
 
     const init = async () => {
+      chartLibrary?.setMaxCandlesOnScreenCount(chart.chartSettings.maxCandlesOnScreenCount)
+      chartLibrary?.setChartYScale(chart.chartSettings.scaleY)
+      drawingLibrary?.setChartYScale(chart.chartSettings.scaleY)
+
       await chart.loadChart(ticker)
       chartLibrary?.hidePreloader()
       setIsLoading(false)
@@ -137,10 +139,10 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
   }, [chartWrapperRef, colors, ticker, canvasSize.width])
 
   useEffect(() => reaction(
-    () => chartConnector.settings.scaleY,
+    () => chart.chartSettings.scaleY,
     () => {
-      chartLibrary?.setChartYScale(chartConnector.settings.scaleY)
-      drawingLibrary?.setChartYScale(chartConnector.settings.scaleY)
+      chartLibrary?.setChartYScale(chart.chartSettings.scaleY)
+      drawingLibrary?.setChartYScale(chart.chartSettings.scaleY)
       chartLibrary?.drawChart(chart.tickerData, {
         x: chart.chartData.cursorX,
         y: chart.chartData.cursorY,
