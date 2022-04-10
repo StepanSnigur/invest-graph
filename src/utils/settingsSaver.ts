@@ -3,6 +3,7 @@ class SettingsSaver {
   private defaultSettings = {
     maxCandlesOnScreenCount: 150,
     scaleY: 0.9,
+    interval: '1min',
   }
 
   checkDefaultSettings = () => {
