@@ -29,6 +29,7 @@ class Chart extends ChartCore {
   private preloaderAnimationId: ReturnType<typeof requestAnimationFrame> | null = null
   private chartCandles: IChartCandle[] = []
   private focusedCandle: IChartCandle | null = null
+  private tempFocusedCandle: IChartCandle | null = null
 
   constructor(width: number, height: number, colors: IThemeColors, ctx: CanvasRenderingContext2D, handlers: IChartHandlers) {
     super(width, height, ctx)
@@ -103,7 +104,11 @@ class Chart extends ChartCore {
       this.drawChartCells()
       this.drawChartCandles(data, pricesRange, minPrice, defaultColumnWidth, offsetX, cursorData)
       this.drawChartDates(data, offsetX)
-      this.drawChartCursor(cursorData)
+
+      if (cursorData.x !== 0 && cursorData.y !== 0) {
+        this.drawChartCursor(cursorData)
+        this.tempFocusedCandle?.idx && this.drawCurrentDate(cursorData.x, data[this.tempFocusedCandle.idx].datetime)
+      }
     }
   }
   private drawChartCandles = (
@@ -187,10 +192,8 @@ class Chart extends ChartCore {
     })
   }
   private drawChartCursor = (cursorData: ICursorData) => {
-    if (cursorData.x !== 0 && cursorData.y !== 0) {
-      this.ctx.strokeStyle = this.settings.colors?.text || '#000'
-      this.setCursorPosition(cursorData.x, cursorData.y)
-    }
+    this.ctx.strokeStyle = this.settings.colors?.text || '#000'
+    this.setCursorPosition(cursorData.x, cursorData.y)
   }
   private getPricePositionOnChart = (price: number, minPrice: number, pricesRange: number) => {
     const percentPosition = (price - minPrice) * 100 / pricesRange
@@ -213,7 +216,30 @@ class Chart extends ChartCore {
       this.ctx.stroke()
 
       this.focusedCandle = this.getCandle(x)
+      if (this.focusedCandle) {
+        this.tempFocusedCandle = this.focusedCandle
+      }
     }
+  }
+  public drawCurrentDate = (x: number, date: string) => {
+    this.ctx.font = '12px Trebuchet MS,roboto,ubuntu,sans-serif'
+    const currentDateSizes = {
+      width: this.ctx.measureText(date).width + 30,
+      height: 20,
+    }
+    const xPosition = x - currentDateSizes.width / 2
+
+    this.ctx.fillStyle = this.settings.colors!.button
+    this.roundedRect(
+      this.ctx, xPosition,
+      this.sizes.height - currentDateSizes.height,
+      currentDateSizes.width,
+      currentDateSizes.height,
+      5,
+    )
+
+    this.ctx.fillStyle = this.settings.colors!.text
+    this.ctx.fillText(date, xPosition + 15, this.sizes.height - currentDateSizes.height / 2 + 3)
   }
   public showPreloader = () => {
     if (!this.settings.colors) throw new Error('You must provide colors to chart')
