@@ -35,6 +35,7 @@ const DropDownOptionsBackground = styled.div`
   position: fixed;
   width: 100%;
   height: 200%;
+  z-index: 99;
 `
 const DropDownOptionsWrapper = styled.div`
   box-sizing: border-box;
@@ -48,6 +49,7 @@ const DropDownOptionsWrapper = styled.div`
   background: ${(props: IAppTheme) => props.theme.button};
   color: ${(props: IAppTheme) => props.theme.text};
   overflow: hidden;
+  z-index: 999;
 `
 const DropDownOption = styled.button`
   padding: 7px 0;
@@ -77,14 +79,14 @@ interface DropDownIntersections {
 }
 interface IOption {
   name: string
-  onPress:(value: string) => void
 }
 interface IDropDown {
-  title: string
+  currentOptionIndex: number
   options: IOption[]
+  onChange: (optionIdx: number) => void
   showIcon?: boolean
 }
-export const DropDown: React.FC<IDropDown> = ({ title, options, showIcon = false }) => {
+export const DropDown: React.FC<IDropDown> = ({ currentOptionIndex, options, onChange, showIcon = false }) => {
   const [isOpen, setIsOpen] = useState(false)
   const themeContext = useContext(ThemeContext)
   const dropDownRef = useRef<HTMLDivElement | null>(null)
@@ -114,6 +116,10 @@ export const DropDown: React.FC<IDropDown> = ({ title, options, showIcon = false
 
     setIsOpen(!isOpen)
   }
+  const handleDropDownClick = (idx: number) => {
+    onChange(idx)
+    handleDropDownClose()
+  }
   const handleDropDownClose = () => {
     setIsOpen(false)
   }
@@ -127,7 +133,7 @@ export const DropDown: React.FC<IDropDown> = ({ title, options, showIcon = false
           showIcon={showIcon}
           theme={themeContext.colors}
         >
-          {title}
+          {options[currentOptionIndex].name}
           {showIcon
             ? <DropDownIndicator isOpen={isOpen}>&#129171;</DropDownIndicator>
             : null}
@@ -144,10 +150,7 @@ export const DropDown: React.FC<IDropDown> = ({ title, options, showIcon = false
           {options.map((option, i) => (
             <DropDownOption
               key={i}
-              onClick={() => {
-                option.onPress(option.name)
-                handleDropDownClose()
-              }}
+              onClick={() => handleDropDownClick(i)}
               theme={themeContext.colors}
             >{option.name}</DropDownOption>
           ))}

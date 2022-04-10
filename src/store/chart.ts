@@ -44,6 +44,7 @@ interface ITickerStatistics {
 export interface IChartSettings {
   maxCandlesOnScreenCount: number,
   scaleY: number,
+  interval: string,
 }
 export interface IChartDrawing {
   from: {
@@ -83,6 +84,7 @@ class Chart {
   chartSettings: IChartSettings = {
     maxCandlesOnScreenCount: 150,
     scaleY: 0.9,
+    interval: '1min',
   }
   chartDrawings: IChartDrawing[] = []
   isInDrawingMode: IDrawingFunctions | false = false
@@ -96,10 +98,11 @@ class Chart {
   }
 
   loadChart = async (ticker: string) => {
+    const { maxCandlesOnScreenCount, interval } = this.chartSettings
     try {
-      const tickerData = await chartApi.getChart(ticker, this.chartSettings.maxCandlesOnScreenCount)
+      const tickerData = await chartApi.getChart(ticker, maxCandlesOnScreenCount, interval)
       const tickerInfo = await chartApi.getTickerMeta(ticker)
-      const tickerIndicators = await chartApi.getTickerIndicators(ticker, Object.keys(this.tickerIndicators))
+      const tickerIndicators = await chartApi.getTickerIndicators(ticker, Object.keys(this.tickerIndicators), interval)
       const tickerStatistics = await chartApi.getTickerStatistics(ticker)
 
       this.setTickerMeta({ ...tickerInfo.meta, logo: tickerInfo.url })
@@ -174,8 +177,9 @@ class Chart {
   }
   getNewChartCandles = async (candlesCount: number, endDate: string) => {
     if (!this.tickerMeta?.symbol) throw new Error('Unknown ticker')
+    const { interval } = this.chartSettings
 
-    return await chartApi.getNewChartCandles(this.tickerMeta.symbol, candlesCount, endDate)
+    return await chartApi.getNewChartCandles(this.tickerMeta.symbol, candlesCount, endDate, interval)
   }
 
   setIsInDrawingMode = (isInDrawingMode: IDrawingFunctions | false) => {
@@ -205,6 +209,11 @@ class Chart {
     const newScale = this.chartSettings.scaleY + scaleY
     if (newScale > 0.2 && newScale < 5) {
       this.chartSettings.scaleY = newScale
+    }
+  }
+  setInterval = (interval: string) => {
+    if (interval !== this.chartSettings.interval) {
+      this.chartSettings.interval = interval
     }
   }
 

@@ -1,8 +1,7 @@
 import React, { useContext } from 'react'
 import styled from 'styled-components'
 import { ThemeContext, IAppTheme } from '../context/ThemeContext'
-
-import { DropDown } from './DropDown'
+import { ChartIntervalButton } from './ChartIntervalButton'
 
 const ChartControlsWrapper = styled.div`
   height: 6%;
@@ -39,13 +38,6 @@ const ChartInput = styled.input`
 export const ChartControls = () => {
   const { colors } = useContext(ThemeContext)
 
-  const testOptions = [
-    { name: 'test1', onPress: (val: string) => console.log(val) },
-    { name: 'test2', onPress: (val: string) => console.log(val) },
-    { name: 'test2', onPress: (val: string) => console.log(val) },
-    { name: 'test4', onPress: (val: string) => console.log(val) },
-  ]
-
   return (
     <ChartControlsWrapper>
       <ButtonsBlock>
@@ -54,7 +46,7 @@ export const ChartControls = () => {
         <ControlButton theme={colors}>test</ControlButton>
       </ButtonsBlock>
       <ChartInput placeholder="Введите тикер" theme={colors} />
-      <DropDown title="test" options={testOptions} showIcon={true} />
+      <ChartIntervalButton />
     </ChartControlsWrapper>
   )
 }
