@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite'
 import styled from 'styled-components'
 import { ThemeContext } from '../context/ThemeContext'
 import { chart } from '../store/chart'
+import { tickersSearch } from '../store/tickersSearch'
 
 import { Sidebar } from '../components/Sidebar'
 import { ChartControls } from '../components/ChartControls'
@@ -55,7 +56,7 @@ export const Graph: React.FC<IGraph> = observer(({ id }) => {
     {
       background: '#432a48',
       buttons: [
-        { background: '#f4378b', icon: searchIcon, onClick: () => console.log('search') },
+        { background: '#f4378b', icon: searchIcon, onClick: tickersSearch.setFocusOnInput, title: 'поиск' },
         { background: '#f4378b', icon: shareIcon, onClick: () => console.log('share') },
         { background: '#f4378b', icon: watchListIcon, onClick: () => console.log('watchList') },
       ],
