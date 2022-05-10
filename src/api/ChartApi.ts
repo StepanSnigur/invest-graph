@@ -36,6 +36,9 @@ class ChartApi extends ApiConfig{
       `statistics?symbol=${ticker}`
     )
   }
+  searchTicker = async (ticker: string) => {
+    return await this.makeRequest(`symbol_search?symbol=${ticker}&outputsize=7&show_plan=true`)
+  }
 }
 
 const chartApi = new ChartApi()

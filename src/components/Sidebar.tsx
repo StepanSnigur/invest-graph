@@ -58,6 +58,7 @@ interface ISidebarButton {
   background: string,
   onClick: () => void,
   isActive?: boolean,
+  title?: string,
 }
 interface IButtonsBlocks {
   background: string,
@@ -75,7 +76,7 @@ export const Sidebar: React.FC<ISidebar> = ({ buttonsBlocks }) => {
           onClick={button.onClick}
           key={j}
         >
-          <ButtonIcon src={button.icon} alt="button"/>
+          <ButtonIcon src={button.icon} alt="button" title={button.title}/>
           {button.isActive ? <ActiveIndicator /> : null}
         </SidebarButton>)}
       </ButtonsBlock>)}
