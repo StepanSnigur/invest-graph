@@ -1,26 +1,56 @@
 import React, { useContext, useState, useEffect } from 'react'
 import { useHistory } from 'react-router-dom'
 import { observer } from 'mobx-react-lite'
-import { tickersSearch } from '../store/tickersSearch'
+import { tickersSearch, ISearchedTicker } from '../store/tickersSearch'
 import { ThemeContext, IAppTheme } from '../context/ThemeContext'
-import styled from 'styled-components'
+import styled, { keyframes } from 'styled-components'
 import historyIcon from '../assets/images/history-icon.png'
-import { ISearchedTicker } from '../store/tickersSearch'
 import { tickerQueriesSaver } from '../utils/tickerQueriesSaver'
 import { sliceLongString } from '../utils/sliceLongString'
 
 import { Preloader } from '../components/Preloader'
 
+const zoomAnimation = keyframes`
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(100);
+  }
+`
+
+const HideLayout = styled.div`
+  position: fixed;
+  width: 100vw;
+  height: 100vh;
+  left: 0;
+  top: 0;
+  z-index: 99;
+
+  &:before {
+    content: '';
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 6%;
+    background: #000;
+    opacity: .4;
+    border-radius: 50%;
+    animation: ${zoomAnimation} 2s forwards;
+  }
+`
 const SearchResultsWrapper = styled.div`
   position: absolute;
-  top: 100%;
+  top: 6%;
   left: 50%;
   transform: translateX(-50%);
   width: 200px;
   padding: 10px;
   border-radius: 8px;
   background: ${(props: IAppTheme) => props.theme.button};
-  z-index: 99;
+  z-index: 999;
 `
 const SearchResult = styled.button<SearchResultProps>`
   position: relative;
@@ -111,17 +141,19 @@ const SearchResults: React.FC<ISearchResults> = observer(({ isVisible }) => {
 
   if (!isVisible) return null
   return (
-    <SearchResultsWrapper theme={colors}>
-      {tickersSearch.isSearching
-        ? <Preloader size={24} marginVertical={15} />
-        : tickersSearch.searchedTickers.map((ticker, i) => <TickerButton ticker={ticker} key={i} onTickerClick={handleTickerClick} />)}
+    <HideLayout onClick={tickersSearch.handleInputBlur}>
+      <SearchResultsWrapper theme={colors}>
+        {tickersSearch.isSearching
+          ? <Preloader size={24} marginVertical={15} />
+          : tickersSearch.searchedTickers.map((ticker, i) => <TickerButton ticker={ticker} key={i} onTickerClick={handleTickerClick} />)}
 
-      {lastSearches.length && (tickersSearch.searchedTickers.length || tickersSearch.isSearching)
-        ? <ResultsDivider theme={colors} />
-        : null}
+        {lastSearches.length && (tickersSearch.searchedTickers.length || tickersSearch.isSearching)
+          ? <ResultsDivider theme={colors} />
+          : null}
 
-      {lastSearches.map((ticker, i) => <TickerButton ticker={ticker} key={i} onTickerClick={handleTickerClick} isFromStorage={true} />)}
-    </SearchResultsWrapper>
+        {lastSearches.map((ticker, i) => <TickerButton ticker={ticker} key={i} onTickerClick={handleTickerClick} isFromStorage={true} />)}
+      </SearchResultsWrapper>
+    </HideLayout>
   )
 })
 

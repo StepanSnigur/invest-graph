@@ -7,7 +7,6 @@ import { ChartIntervalButton } from './ChartIntervalButton'
 import { SearchResults } from './SearchResults'
 
 const ChartControlsWrapper = styled.div`
-  position: relative;
   height: 6%;
   display: flex;
   justify-content: space-between;
@@ -32,14 +31,15 @@ const ControlButton = styled.button`
 const ChartInput = styled.input`
   position: absolute;
   left: 50%;
+  height: 5%;
   transform: translateX(-50%);
-  height: 80%;
   background: ${(props: IAppTheme) => props.theme.button};
   color: ${(props: IAppTheme) => props.theme.text};
   font-size: 16px;
   border: none;
   border-radius: 8px;
   padding: 0 10px;
+  z-index: 999;
 `
 
 export const ChartControls = observer(() => {
@@ -47,18 +47,6 @@ export const ChartControls = observer(() => {
   const { colors } = useContext(ThemeContext)
   const searchInputRef = useRef<HTMLInputElement | null>(null)
 
-  useEffect(() => {
-    const listener = (e: any) => {
-      if (e.target.getAttribute('title') !== 'поиск') { // hide search results if click not on search button
-        tickersSearch.handleInputBlur()
-      }
-    }
-
-    document.addEventListener('click', listener)
-    return () => {
-      document.removeEventListener('click', listener)
-    }
-  }, [])
   useEffect(() => {
     if (searchInputRef.current) {
       tickersSearch.setSearchInputRef(searchInputRef.current)
