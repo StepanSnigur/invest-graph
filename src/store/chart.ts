@@ -115,7 +115,7 @@ class Chart {
       const tickerIndicators = await chartApi.getTickerIndicators(ticker, Object.keys(this.tickerIndicators), interval)
       const tickerStatistics = await chartApi.getTickerStatistics(ticker)
 
-      this.setTickerMeta({ ...tickerInfo.meta, logo: tickerInfo.url })
+      this.setTickerMeta({ ...tickerInfo.meta, logo: tickerInfo.url, currency: tickerData.meta.currency})
       this.setTickerData(tickerData.values.reverse())
       this.setTickerIndicators(tickerIndicators)
       this.setTickerStatistics(tickerStatistics.statistics)

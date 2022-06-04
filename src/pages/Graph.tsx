@@ -64,8 +64,8 @@ export const Graph: React.FC<IGraph> = observer(({ id }) => {
     {
       background: '#332757',
       buttons: [
-        { background: '#7739FE', icon: pencilIcon, onClick: () => chart.setIsInDrawingMode('drawLine'), isActive: !!chart.isInDrawingMode },
-        { background: '#7739FE', icon: measureIcon, onClick: () => console.log('measure') },
+        { background: '#7739FE', icon: pencilIcon, onClick: () => chart.setIsInDrawingMode('drawLine'), isActive: chart.isInDrawingMode === 'drawLine' },
+        { background: '#7739FE', icon: measureIcon, onClick: () => chart.setIsInDrawingMode('drawMeasureLine'), isActive: chart.isInDrawingMode === 'drawMeasureLine' },
         { background: '#7739FE', icon: patternIcon, onClick: () => console.log('trading pattern') },
         { background: '#7739FE', icon: textIcon, onClick: () => console.log('text') },
         { background: '#7739FE', icon: binIcon, onClick: chart.removeAllDrawings },
