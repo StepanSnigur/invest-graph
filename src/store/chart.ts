@@ -97,7 +97,17 @@ class Chart {
     this.chartSettings = settings
   }
 
+  setDefaultData = () => {
+    this.tickerData = []
+    this.tickerMeta = null
+    this.tickerIndicators = {
+      macd: null,
+      rsi: null,
+      adx: null,
+    }
+  }
   loadChart = async (ticker: string) => {
+    this.setDefaultData()
     const { maxCandlesOnScreenCount, interval } = this.chartSettings
     try {
       const tickerData = await chartApi.getChart(ticker, maxCandlesOnScreenCount, interval)
