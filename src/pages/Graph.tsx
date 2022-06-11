@@ -56,7 +56,7 @@ export const Graph: React.FC<IGraph> = observer(({ id }) => {
     {
       background: '#432a48',
       buttons: [
-        { background: '#f4378b', icon: searchIcon, onClick: tickersSearch.setFocusOnInput, title: 'поиск' },
+        { background: '#f4378b', icon: searchIcon, onClick: tickersSearch.setFocusOnInput, title: 'поиск', isActive: tickersSearch.isInputFocused },
         { background: '#f4378b', icon: shareIcon, onClick: () => console.log('share') },
         { background: '#f4378b', icon: watchListIcon, onClick: () => console.log('watchList') },
       ],
