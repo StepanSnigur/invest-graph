@@ -4,6 +4,7 @@ import styled from 'styled-components'
 import { ThemeContext } from '../context/ThemeContext'
 import { chart } from '../store/chart'
 import { tickersSearch } from '../store/tickersSearch'
+import { chartSketches } from '../store/chartSketches'
 
 import { Sidebar } from '../components/Sidebar'
 import { ChartControls } from '../components/ChartControls'
@@ -17,6 +18,7 @@ import searchIcon from '../assets/images/search-icon.png'
 import shareIcon from '../assets/images/share-icon.png'
 import watchListIcon from '../assets/images/watchList-icon.png'
 import pencilIcon from '../assets/images/pencil-icon.png'
+import paintIcon from '../assets/images/paint-icon.png'
 import measureIcon from '../assets/images/measure-icon.png'
 import binIcon from '../assets/images/bin-icon.png'
 import patternIcon from '../assets/images/pattern-icon.png'
@@ -65,6 +67,7 @@ export const Graph: React.FC<IGraph> = observer(({ id }) => {
       background: '#332757',
       buttons: [
         { background: '#7739FE', icon: pencilIcon, onClick: () => chart.setIsInDrawingMode('drawLine'), isActive: chart.isInDrawingMode === 'drawLine' },
+        { background: '#7739FE', icon: paintIcon, onClick: () => chartSketches.changeDrawingMode(), isActive: chartSketches.isDrawing },
         { background: '#7739FE', icon: measureIcon, onClick: () => chart.setIsInDrawingMode('drawMeasureLine'), isActive: chart.isInDrawingMode === 'drawMeasureLine' },
         { background: '#7739FE', icon: patternIcon, onClick: () => console.log('trading pattern') },
         { background: '#7739FE', icon: textIcon, onClick: () => console.log('text') },

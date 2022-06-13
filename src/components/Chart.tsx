@@ -5,10 +5,13 @@ import { ChartPrices } from './ChartPrices'
 import { autorun, reaction } from 'mobx'
 import { observer } from 'mobx-react-lite'
 import { chart } from '../store/chart'
+import { chartSketches } from '../store/chartSketches'
 import { Chart as ChartLibrary } from '../canvas/ChartLibrary'
 import { DrawingLibrary, ICoordinates } from '../canvas/DrawingLibrary'
 import { EventsManager, IEvent } from '../canvas/EventsManager'
 import { debounce } from '../utils/debounce'
+
+import { PaintCanvas } from './PaintCanvas'
 
 const ChartWrapper = styled.div`
   position: relative;
@@ -27,12 +30,14 @@ const CandleInfo = styled.div`
   font-size: 14px;
   color: ${(props: IAppTheme) => props.theme.text};
   opacity: .8;
+  z-index: 3;
 `
 const ChartCanvas = styled.canvas`
-  background: ${(props: IAppTheme) => props.theme.secondaryBackground};
+  background: transparent;
   border: 1px solid ${(props: IAppTheme) => props.theme.lightButton};
   border-top-left-radius: 12px;
   border-bottom-left-radius: 12px;
+  z-index: 2;
 `
 
 interface IChart {
@@ -198,7 +203,7 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
 
     !isLoading && chart.moveCursor(x, y)
 
-    if (!isLoading && dragData.startX !== null) {
+    if (!isLoading && dragData.startX !== null && !chart.isInDrawingMode && !chartSketches.isDrawing) {
       const delta = e.pageX - dragData.startX
       chart.setOffsetX(delta)
     }
@@ -221,6 +226,10 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
     setDragData({
       startX: e.pageX,
     })
+    if (chartSketches.isDrawing) {
+      chartSketches.startDrawing()
+      chartSketches.setMouseDown(true)
+    }
   }
   const handleMouseUp = async () => {
     setDragData({
@@ -229,6 +238,9 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
     await chart.checkNewData(canvasSize.width)
     chart.setPrevOffsetX()
     chart.setPrevDrawingsOffsetX()
+    if (chartSketches.isDrawing) {
+      chartSketches.setMouseDown(false)
+    }
   }
   const handleMouseClick = () => {
     if (chart.isInDrawingMode && chart.drawIndex !== null) {
@@ -278,6 +290,13 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
       >
         Браузер не поддерживает Canvas
       </ChartCanvas>
+      <PaintCanvas
+        width={canvasSize.width}
+        height={canvasSize.height}
+        x={chart.chartData.cursorX - chart.chartData.drawingsOffsetX}
+        y={chart.chartData.cursorY}
+      />
+
       <ChartPrices
         width={canvasSize.width / 16}
         height={canvasSize.height}

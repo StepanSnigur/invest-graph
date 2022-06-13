@@ -8,18 +8,6 @@ export interface ICoordinates {
   y: number, // price
 }
 class DrawingLibrary extends ChartCore {
-  startDrawing = (drawFunction: string, from: ICoordinates) => {
-    const drawing = {
-      from,
-      to: {},
-      fn: drawFunction,
-    }
-
-    return (to: ICoordinates, isOver: boolean) => {
-      drawing.to = to
-    }
-  }
-
   drawLine = (from: ICoordinates, to: ICoordinates, offsetX: number) => {
     const { minChartPrice, maxChartPrice } = chartConnector.data
     const fromYOffset = this.getPricePosition(from.y, minChartPrice, maxChartPrice)
