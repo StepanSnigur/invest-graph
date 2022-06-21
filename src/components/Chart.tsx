@@ -201,7 +201,7 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
     const x = e.clientX - chartPosition.left
     const y = e.clientY - chartPosition.top
 
-    !isLoading && chart.moveCursor(x, y)
+    !isLoading && !chart.error && chart.moveCursor(x, y)
 
     if (!isLoading && dragData.startX !== null && !chart.isInDrawingMode && !chartSketches.isDrawing) {
       const delta = e.pageX - dragData.startX
