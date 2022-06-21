@@ -1,4 +1,5 @@
-import { ISketch, ISketchPoint } from '../store/chartSketches'
+import { ISketch, ISketchPoint, IChartDrawing } from '../store/chartSketches'
+import { IThemeColors } from '../context/ThemeContext'
 
 interface IPaintData {
   sketches: string,
@@ -6,6 +7,7 @@ interface IPaintData {
   maxPrice: number,
   offsetX: number,
   scaleY: number,
+  chartColors: IThemeColors,
 }
 const paintCanvasWorker = () => {
   const drawLines = (ctx: CanvasRenderingContext2D, points: number[]) => {
@@ -17,6 +19,12 @@ const paintCanvasWorker = () => {
     const scaledPosition = (height - (height / 100 * percentPosition)) * scaleY
     const scaledHeight = (height - height * scaleY) / 2
     return scaledPosition + scaledHeight
+  }
+  const getCurrentPrice = (y: number, height: number, scaleY: number, minPrice: number, maxPrice: number) => {
+    const scaledHeight = height * scaleY
+    const clippedHeight = (height - scaledHeight) / 2
+    const percentPosition = ((scaledHeight + clippedHeight) - y) * 100 / scaledHeight
+    return (percentPosition * (maxPrice - minPrice) / 100) + minPrice
   }
   const moveCurvePoints = (points: ISketchPoint[], height: number, paintData: IPaintData) => {
     const { minPrice, maxPrice, offsetX, scaleY } = paintData
@@ -92,6 +100,116 @@ const paintCanvasWorker = () => {
   
     return res
   }
+  const drawingLibrary = {
+    drawLine: function (
+      ctx: CanvasRenderingContext2D,
+      from: ISketchPoint,
+      to: ISketchPoint,
+      offsetX: number,
+      minPrice: number,
+      maxPrice: number,
+      height: number,
+      scaleY: number,
+      chartColors: IThemeColors,
+    ) {
+      const fromYOffset = getPricePosition(from.y, minPrice, maxPrice, height, scaleY)
+      const toYOffset = getPricePosition(to.y, minPrice, maxPrice, height, scaleY)
+  
+      ctx.beginPath()
+      ctx.strokeStyle = chartColors.button
+      ctx.setLineDash([])
+      ctx.lineWidth = 3
+      ctx.moveTo(from.x + offsetX, fromYOffset)
+      ctx.lineTo(to.x + offsetX, toYOffset)
+      ctx.stroke()
+      ctx.closePath()
+    },
+    drawMeasureLine: function (
+      ctx: CanvasRenderingContext2D,
+      from: ISketchPoint,
+      to: ISketchPoint,
+      offsetX: number,
+      minPrice: number,
+      maxPrice: number,
+      canvasHeight: number,
+      scaleY: number,
+      chartColors: IThemeColors,
+    ) {
+      const fromYOffset = getPricePosition(from.y, minPrice, maxPrice, canvasHeight, scaleY)
+      const toYOffset = getPricePosition(to.y, minPrice, maxPrice, canvasHeight, scaleY)
+      const width = to.x - from.x
+      const height = toYOffset - fromYOffset
+  
+      const startPrice = getCurrentPrice(fromYOffset, canvasHeight, scaleY, minPrice, maxPrice)
+      const endPrice = getCurrentPrice(toYOffset, canvasHeight, scaleY, minPrice, maxPrice)
+      const percent = Math.abs(startPrice - endPrice) * 100 / Math.max(startPrice, endPrice)
+      const fillColor = startPrice > endPrice ? chartColors.stockDown : chartColors.stockUp
+  
+  
+      ctx.setLineDash([])
+      ctx.lineWidth = 2
+      ctx.strokeStyle = fillColor
+      ctx.fillStyle = fillColor
+  
+      ctx.globalAlpha = 0.2
+      ctx.fillRect(from.x  + offsetX, fromYOffset, width, height)
+      ctx.globalAlpha = 1.0
+  
+      ctx.beginPath() // arrow
+      this.drawArrow(
+        ctx,
+        from.x + offsetX + width / 2,
+        fromYOffset,
+        from.x + offsetX + width / 2,
+        toYOffset,
+        5,
+        5,
+      )
+      ctx.closePath()
+  
+      ctx.font = '16px sans-serif'
+      ctx.fillText(
+        `${(startPrice > endPrice) ? '-' : '+'}${percent.toFixed(2)}%`,
+        from.x + offsetX + width / 2 + 10,
+        fromYOffset + height / 2,
+        Math.abs(width / 2),
+      )
+      ctx.fillText(
+        `${-(startPrice - endPrice).toFixed(3)}${'$'}`, // TODO
+        from.x + offsetX + width / 2 + 10,
+        fromYOffset + height / 2 + 20,
+        Math.abs(width / 2),
+      )
+    },
+  
+    drawArrow: (
+      ctx: CanvasRenderingContext2D,
+      x0: number,
+      y0: number,
+      x1: number,
+      y1: number,
+      arrowWidth: number,
+      arrowLength: number,
+    ) => {
+      const dx=x1-x0
+      const dy=y1-y0
+      const angle=Math.atan2(dy, dx)
+      const length=Math.sqrt(dx * dx + dy * dy)
+  
+      ctx.translate(x0, y0)
+      ctx.rotate(angle)
+      ctx.beginPath()
+      ctx.moveTo(0, 0)
+      ctx.lineTo(length, 0)
+  
+      ctx.moveTo(length - arrowLength,-arrowWidth)
+      ctx.lineTo(length, 0)
+      ctx.lineTo(length - arrowLength,arrowWidth)
+  
+      ctx.stroke()
+      ctx.setTransform(1, 0, 0, 1, 0, 0)
+    }
+  }
   
   const drawCurve = (ctx: CanvasRenderingContext2D, height: number, paintData: IPaintData) => {
     JSON.parse(paintData.sketches).forEach((sketch: ISketch) => {
@@ -105,8 +223,27 @@ const paintCanvasWorker = () => {
       ctx.stroke()
     })
   }
-  let context: CanvasRenderingContext2D | null = null
+  const drawTool = (
+    ctx: CanvasRenderingContext2D,
+    drawing: IChartDrawing,
+    height: number,
+    paintData: IPaintData,
+  ) => {
+    const { minPrice, maxPrice, offsetX, scaleY, chartColors } = paintData
+    drawingLibrary[drawing.drawFunction](
+      ctx,
+      drawing.from,
+      drawing.to as ISketchPoint,
+      offsetX,
+      minPrice,
+      maxPrice,
+      height,
+      scaleY,
+      chartColors,
+    )
+  }
 
+  let context: CanvasRenderingContext2D | null = null
   onmessage = function({ data }) {
     if (data.offscreenCanvas) {
       context = data.offscreenCanvas.getContext('2d')
@@ -115,13 +252,21 @@ const paintCanvasWorker = () => {
       context.clearRect(0, 0, context.canvas.width, context.canvas.height)
       drawCurve(context, context.canvas.height, data)
     }
+    if (context && data.toolDrawings) {
+      const drawings = JSON.parse(data.toolDrawings)
+      drawings.forEach((drawing: IChartDrawing) => {
+        if (drawing.to.x !== null && drawing.to.y !== null && context) {
+          drawTool(context, drawing, context.canvas.height, data)
+        }
+      })
+    }
   }
 }
 
 let code = paintCanvasWorker.toString()
 code = code.substring(code.indexOf("{")+1, code.lastIndexOf("}"))
 
-const blob = new Blob([code], {type: "application/javascript"})
+const blob = new Blob([code], { type: "application/javascript" })
 const paintCanvasWorkerScript = URL.createObjectURL(blob)
 
 export {

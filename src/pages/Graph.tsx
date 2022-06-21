@@ -2,7 +2,6 @@ import React, { useContext } from 'react'
 import { observer } from 'mobx-react-lite'
 import styled from 'styled-components'
 import { ThemeContext } from '../context/ThemeContext'
-import { chart } from '../store/chart'
 import { tickersSearch } from '../store/tickersSearch'
 import { chartSketches } from '../store/chartSketches'
 
@@ -66,12 +65,12 @@ export const Graph: React.FC<IGraph> = observer(({ id }) => {
     {
       background: '#332757',
       buttons: [
-        { background: '#7739FE', icon: pencilIcon, onClick: () => chart.setIsInDrawingMode('drawLine'), isActive: chart.isInDrawingMode === 'drawLine' },
+        { background: '#7739FE', icon: pencilIcon, onClick: () => chartSketches.setToolsDrawingMode('drawLine'), isActive: chartSketches.isDrawingTools === 'drawLine' },
         { background: '#7739FE', icon: paintIcon, onClick: () => chartSketches.changeDrawingMode(), isActive: chartSketches.isDrawing },
-        { background: '#7739FE', icon: measureIcon, onClick: () => chart.setIsInDrawingMode('drawMeasureLine'), isActive: chart.isInDrawingMode === 'drawMeasureLine' },
+        { background: '#7739FE', icon: measureIcon, onClick: () => chartSketches.setToolsDrawingMode('drawMeasureLine'), isActive: chartSketches.isDrawingTools === 'drawMeasureLine' },
         { background: '#7739FE', icon: patternIcon, onClick: () => console.log('trading pattern') },
         { background: '#7739FE', icon: textIcon, onClick: () => console.log('text') },
-        { background: '#7739FE', icon: binIcon, onClick: chart.removeAllDrawings },
+        { background: '#7739FE', icon: binIcon, onClick: chartSketches.removeAllDrawings },
       ],
     },
     {background: 'inherit', buttons: [

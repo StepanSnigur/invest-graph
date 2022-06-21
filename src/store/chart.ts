@@ -1,6 +1,5 @@
 import { makeAutoObservable, runInAction, observe } from 'mobx'
 import { chartApi } from '../api/ChartApi'
-import { ICoordinates, IDrawingFunctions } from '../canvas/DrawingLibrary'
 import { settingsSaver } from '../utils/settingsSaver'
 
 export interface ITickerData {
@@ -46,17 +45,6 @@ export interface IChartSettings {
   scaleY: number,
   interval: string,
 }
-export interface IChartDrawing {
-  from: {
-    x: number,
-    y: number,
-  },
-  to: {
-    x: number | null,
-    y: number | null,
-  },
-  drawFunction: IDrawingFunctions,
-}
 
 class Chart {
   tickerData: ITickerData[] = []
@@ -86,9 +74,6 @@ class Chart {
     scaleY: 0.9,
     interval: '1min',
   }
-  chartDrawings: IChartDrawing[] = []
-  isInDrawingMode: IDrawingFunctions | false = false
-  drawIndex: number | null = null
 
   constructor() {
     makeAutoObservable(this)
@@ -190,26 +175,6 @@ class Chart {
     const { interval } = this.chartSettings
 
     return await chartApi.getNewChartCandles(this.tickerMeta.symbol, candlesCount, endDate, interval)
-  }
-
-  setIsInDrawingMode = (isInDrawingMode: IDrawingFunctions | false) => {
-    if (isInDrawingMode === this.isInDrawingMode) {
-      this.isInDrawingMode = false
-    } else {
-      this.isInDrawingMode = isInDrawingMode
-    }
-  }
-  addChartDrawing = (drawing: IChartDrawing) => {
-    this.chartDrawings.push(drawing)
-  }
-  changeLastDrawingPosition = (to: ICoordinates) => {
-    this.chartDrawings[this.chartDrawings.length - 1].to = to
-  }
-  setDrawIndex = (drawIndex: number | null) => {
-    this.drawIndex = drawIndex
-  }
-  removeAllDrawings = () => {
-    this.chartDrawings = []
   }
 
   setMaxCandlesOnScreenCount = (count: number) => {
