@@ -7,7 +7,7 @@ import { observer } from 'mobx-react-lite'
 import { chart } from '../store/chart'
 import { chartSketches } from '../store/chartSketches'
 import { Chart as ChartLibrary } from '../canvas/ChartLibrary'
-import { DrawingLibrary, ICoordinates } from '../canvas/DrawingLibrary'
+import { DrawingLibrary } from '../canvas/DrawingLibrary'
 import { EventsManager, IEvent } from '../canvas/EventsManager'
 import { debounce } from '../utils/debounce'
 
@@ -164,17 +164,6 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
       }, chart.chartData.offsetX)
     }
   ))
-  useEffect(() => reaction( // clear chart from drawings
-    () => chart.chartDrawings,
-    () => {
-      if (chart.chartDrawings.length === 0) {
-        chartLibrary?.drawChart(chart.tickerData, {
-          x: chart.chartData.cursorX,
-          y: chart.chartData.cursorY,
-        }, chart.chartData.offsetX)
-      }
-    }
-  ))
   useEffect(() => autorun(() => {
     if (chart.error) {
       onChartError(chart.error)
@@ -187,30 +176,20 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
     }
   }))
 
-  useEffect(() => autorun(() => {
-    if (chart.chartDrawings.length > 0) {
-      chart.chartDrawings.forEach(drawing => {
-        if (drawingLibrary && drawing.to.x !== null && drawing.to.y !== null) {
-          drawingLibrary[drawing.drawFunction](drawing.from, drawing.to as ICoordinates, chart.chartData.drawingsOffsetX)
-        }
-      })
-    }
-  }))
-
   const handleMouseMove = (e: React.MouseEvent) => {
     const x = e.clientX - chartPosition.left
     const y = e.clientY - chartPosition.top
 
     !isLoading && !chart.error && chart.moveCursor(x, y)
 
-    if (!isLoading && dragData.startX !== null && !chart.isInDrawingMode && !chartSketches.isDrawing) {
+    if (!isLoading && dragData.startX !== null && !chartSketches.isDrawingTools && !chartSketches.isDrawing) {
       const delta = e.pageX - dragData.startX
       chart.setOffsetX(delta)
     }
 
-    if (chart.isInDrawingMode && chart.drawIndex !== null) {
+    if (chartSketches.isDrawingTools && chartSketches.toolDrawIndex !== null) {
       const toY = drawingLibrary?.getCurrentPrice(y)
-      toY && chart.changeLastDrawingPosition({
+      toY && chartSketches.changeLastToolDrawingPosition({
         x: x - chart.chartData.drawingsOffsetX,
         y: toY,
       })
@@ -243,15 +222,15 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
     }
   }
   const handleMouseClick = () => {
-    if (chart.isInDrawingMode && chart.drawIndex !== null) {
-      chart.setIsInDrawingMode(false)
-      chart.setDrawIndex(null)
+    if (chartSketches.isDrawingTools && chartSketches.toolDrawIndex !== null) {
+      chartSketches.setToolsDrawingMode(false)
+      chartSketches.setToolDrawIndex(null)
       return false
     }
-    if (chart.isInDrawingMode) {
+    if (chartSketches.isDrawingTools) {
       const fromY = drawingLibrary?.getCurrentPrice(chart.chartData.cursorY)
       if (fromY) {
-        chart.addChartDrawing({
+        chartSketches.addChartTool({
           from: {
             x: chart.chartData.cursorX - chart.chartData.drawingsOffsetX,
             y: fromY,
@@ -260,9 +239,9 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
             x: null,
             y: null,
           },
-          drawFunction: chart.isInDrawingMode,
+          drawFunction: chartSketches.isDrawingTools,
         })
-        chart.setDrawIndex(chart.chartDrawings.length - 1)
+        chartSketches.setToolDrawIndex(chartSketches.toolDrawings.length - 1)
       }
     }
   }
