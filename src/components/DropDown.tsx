@@ -1,6 +1,6 @@
-import React, { useState, useContext, useRef } from 'react'
+import React, { useState, useRef } from 'react'
 import styled from 'styled-components'
-import { IAppTheme, ThemeContext } from '../context/ThemeContext'
+import { useTheme, Theme } from '@mui/material'
 
 const DropDownWrapper = styled.div`
   height: 80%;
@@ -15,8 +15,8 @@ const DropDownButton = styled.button`
   padding: ${(props: { showIcon: boolean }) => props.showIcon ? '0 24px 0 16px' : '0 10px'};
   border: none;
   border-radius: 8px;
-  background: ${(props: IAppTheme) => props.theme.button};
-  color: ${(props: IAppTheme) => props.theme.text};
+  background: ${({ theme }: { theme: Theme }) => theme.palette.secondary.main};
+  color: ${({ theme }: { theme: Theme }) => theme.palette.text.primary};
   cursor: pointer;
 `
 const DropDownIndicator = styled.span`
@@ -46,8 +46,8 @@ const DropDownOptionsWrapper = styled.div`
   border-radius: 8px;
   display: flex;
   flex-direction: column;
-  background: ${(props: IAppTheme) => props.theme.button};
-  color: ${(props: IAppTheme) => props.theme.text};
+  background: ${({ theme }: { theme: Theme }) => theme.palette.secondary.main};
+  color: ${({ theme }: { theme: Theme }) => theme.palette.text.primary};
   overflow: hidden;
   z-index: 999;
 `
@@ -55,7 +55,7 @@ const DropDownOption = styled.button`
   padding: 7px 0;
   margin-bottom: 3px;
   color: #dcdccc;
-  background: ${(props: IAppTheme) => props.theme.button};
+  background: ${({ theme }: { theme: Theme }) => theme.palette.secondary.main};
   border: none;
   border-radius: 8px;
   min-width: 200px;
@@ -63,8 +63,8 @@ const DropDownOption = styled.button`
   cursor: pointer;
   
   &:hover {
-    background: ${(props: IAppTheme) => props.theme.lightButton};
-    color: ${(props: IAppTheme) => props.theme.darkText};
+    background: ${({ theme }: { theme: Theme }) => theme.palette.primary.main};
+    color: ${({ theme }: { theme: Theme }) => theme.palette.text.secondary};
   }
   &:last-child {
     margin-bottom: 0;
@@ -88,7 +88,7 @@ interface IDropDown {
 }
 export const DropDown: React.FC<IDropDown> = ({ currentOptionIndex, options, onChange, showIcon = false }) => {
   const [isOpen, setIsOpen] = useState(false)
-  const themeContext = useContext(ThemeContext)
+  const theme = useTheme()
   const dropDownRef = useRef<HTMLDivElement | null>(null)
 
   const isDropDownVisible = (): DropDownIntersections | null => {
@@ -131,7 +131,7 @@ export const DropDown: React.FC<IDropDown> = ({ currentOptionIndex, options, onC
         <DropDownButton
           onClick={handleDropDownToggle}
           showIcon={showIcon}
-          theme={themeContext.colors}
+          theme={theme}
         >
           {options[currentOptionIndex].name}
           {showIcon
@@ -139,7 +139,7 @@ export const DropDown: React.FC<IDropDown> = ({ currentOptionIndex, options, onC
             : null}
         </DropDownButton>
         <DropDownOptionsWrapper
-          theme={themeContext.colors}
+          theme={theme}
           ref={dropDownRef}
           style={{
             height: isOpen ? 'auto' : 0,
@@ -151,7 +151,7 @@ export const DropDown: React.FC<IDropDown> = ({ currentOptionIndex, options, onC
             <DropDownOption
               key={i}
               onClick={() => handleDropDownClick(i)}
-              theme={themeContext.colors}
+              theme={theme}
             >{option.name}</DropDownOption>
           ))}
         </DropDownOptionsWrapper>

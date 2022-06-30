@@ -1,9 +1,9 @@
-import React, { useContext } from 'react'
+import React from 'react'
 import { observer } from 'mobx-react-lite'
 import { chart } from '../store/chart'
 import { chartConnector } from '../store/chartConnector'
 import styled, { keyframes } from 'styled-components'
-import { ThemeContext, IAppTheme } from '../context/ThemeContext'
+import { useTheme, Theme } from '@mui/material'
 
 import { FavouriteButton } from './FavouriteButton'
 import { DayPriceRange } from './DayPriceRange'
@@ -15,7 +15,7 @@ import researchIcon from '../assets/images/research-icon.png'
 
 const ChartSidebarWrapper = styled.div`
   width: 20%;
-  color: ${(props: IAppTheme) => props.theme.text};
+  color: ${({ theme }: { theme: Theme }) => theme.palette.text.primary};
   box-sizing: border-box;
   padding: 25px 15px;
 `
@@ -36,8 +36,8 @@ const TickerName = styled.h2`
   margin: 0;
 `
 const TickerTag = styled.span`
-  color: ${(props: IAppTheme) => props.theme.text};
-  background: ${(props: IAppTheme) => props.theme.button};
+  color: ${({ theme }: { theme: Theme }) => theme.palette.text.primary};
+  background: ${({ theme }: { theme: Theme }) => theme.palette.secondary.main};
   opacity: .6;
   font-size: 12px;
   font-weight: 400;
@@ -107,7 +107,7 @@ const TickerInfoCard = styled.div`
 `
 
 export const ChartSidebar = observer(() => {
-  const { colors } = useContext(ThemeContext)
+  const theme = useTheme()
 
   const addFavouriteTicker = () => {
     console.log('favourite')
@@ -125,7 +125,7 @@ export const ChartSidebar = observer(() => {
   const priceDelta = Math.abs(lastPrice - oldPrice) / lastPrice * 100
   const isGoingUp = lastPrice > oldPrice
   return (
-    <ChartSidebarWrapper theme={colors}>
+    <ChartSidebarWrapper theme={theme}>
       <div>
         <TickerLogoWrapper>
           <TickerLogo src={tickerMeta.logo} alt={tickerMeta.symbol} />
@@ -133,7 +133,7 @@ export const ChartSidebar = observer(() => {
             <TickerName>{tickerMeta.name}</TickerName>
             <TickerSymbol>{tickerMeta.symbol} / {tickerMeta.exchange}</TickerSymbol>
           </div>
-          <TickerTag theme={colors}>{tickerMeta.symbol}</TickerTag>
+          <TickerTag theme={theme}>{tickerMeta.symbol}</TickerTag>
           <FavouriteButton
             width={32}
             height={32}
@@ -149,7 +149,7 @@ export const ChartSidebar = observer(() => {
           </LastTickerPrice>
           <PriceDelta
             style={{
-              background: isGoingUp ? colors.stockUp : colors.stockDown
+              background: isGoingUp ? theme.palette.success.main : theme.palette.error.main
             }}
           >{isGoingUp ? '+' : '-'}{priceDelta.toFixed(2)}%</PriceDelta>
         </PriceSection>
@@ -269,10 +269,10 @@ const CurrentCandleInfoSkeleton = styled.div`
   }
 `
 const ChartSidebarSkeleton: React.FC = () => {
-  const { colors } = useContext(ThemeContext)
+  const theme = useTheme()
 
   return (
-    <ChartSidebarWrapper theme={colors}>
+    <ChartSidebarWrapper theme={theme}>
       <div>
         <TickerLogoWrapper>
           <TickerLogoSkeleton />

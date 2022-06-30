@@ -1,7 +1,7 @@
-import React, { useContext, useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { observer } from 'mobx-react-lite'
 import styled from 'styled-components'
-import { ThemeContext, IAppTheme } from '../context/ThemeContext'
+import { useTheme, Theme } from '@mui/material'
 import { tickersSearch } from '../store/tickersSearch'
 import { ChartIntervalButton } from './ChartIntervalButton'
 import { SearchResults } from './SearchResults'
@@ -24,8 +24,8 @@ const ControlButton = styled.button`
   padding: 0 10px;
   border: none;
   border-radius: 8px;
-  background: ${(props: IAppTheme) => props.theme.button};
-  color: ${(props: IAppTheme) => props.theme.text};
+  background: ${({ theme }: { theme: Theme }) => theme.palette.secondary.main};
+  color: ${({ theme }: { theme: Theme }) => theme.palette.text.primary};
   cursor: pointer;
 `
 const ChartInput = styled.input`
@@ -33,8 +33,8 @@ const ChartInput = styled.input`
   left: 50%;
   height: 5%;
   transform: translateX(-50%);
-  background: ${(props: IAppTheme) => props.theme.button};
-  color: ${(props: IAppTheme) => props.theme.text};
+  background: ${({ theme }: { theme: Theme }) => theme.palette.secondary.main};
+  color: ${({ theme }: { theme: Theme }) => theme.palette.text.primary};
   font-size: 16px;
   border: none;
   border-radius: 8px;
@@ -44,7 +44,7 @@ const ChartInput = styled.input`
 
 export const ChartControls = observer(() => {
   const [searchInputValue, setSearchInputValue] = useState('')
-  const { colors } = useContext(ThemeContext)
+  const theme = useTheme()
   const searchInputRef = useRef<HTMLInputElement | null>(null)
 
   useEffect(() => {
@@ -61,14 +61,14 @@ export const ChartControls = observer(() => {
   return (
     <ChartControlsWrapper>
       <ButtonsBlock>
-        <ControlButton theme={colors}>test</ControlButton>
-        <ControlButton theme={colors}>test</ControlButton>
-        <ControlButton theme={colors}>test</ControlButton>
+        <ControlButton theme={theme}>test</ControlButton>
+        <ControlButton theme={theme}>test</ControlButton>
+        <ControlButton theme={theme}>test</ControlButton>
       </ButtonsBlock>
       <ChartInput
         placeholder="Введите тикер"
         value={searchInputValue}
-        theme={colors}
+        theme={theme}
         ref={searchInputRef}
         onFocus={tickersSearch.handleInputFocus}
         onChange={handleSearchInputChange}

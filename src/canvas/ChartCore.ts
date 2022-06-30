@@ -1,8 +1,8 @@
-import { IThemeColors } from '../context/ThemeContext'
+import { Theme } from '@mui/material'
 import { CanvasUtils } from './CanvasUtils'
 
 export interface IChartSettings {
-  colors: IThemeColors | null,
+  colors: Theme | null,
   scaleY: number,
   datePadding: number,
   focusedCandleBorderWidth: number,
@@ -37,7 +37,7 @@ class ChartCore extends CanvasUtils {
   public setChartYScale = (scaleY: number) => {
     this.settings.scaleY = scaleY
   }
-  public setChartColors = (colors: IThemeColors) => {
+  public setChartColors = (colors: Theme) => {
     this.settings.colors = colors
   }
   protected clearCanvas = () => {

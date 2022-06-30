@@ -1,6 +1,6 @@
-import React, { useContext } from 'react'
+import React from 'react'
 import styled from 'styled-components'
-import { IAppTheme, ThemeContext } from '../context/ThemeContext'
+import { useTheme, Theme } from '@mui/material'
 
 const DayPriceInfo = styled.div`
   display: flex;
@@ -17,7 +17,7 @@ const DayPriceRangeWrapper = styled.div`
   width: 100%;
   height: 14px;
   border-radius: 12px;
-  background: ${(props: IAppTheme) => props.theme.button};
+  background: ${({ theme }: { theme: Theme }) => theme.palette.secondary.main};
   overflow: hidden;
 `
 const DayPriceRangeCursor = styled.div`
@@ -26,7 +26,7 @@ const DayPriceRangeCursor = styled.div`
   left: 0;
   width: 4px;
   height: 100%;
-  background: ${(props: IAppTheme) => props.theme.text};
+  background: ${({ theme }: { theme: Theme }) => theme.palette.text.primary};
   border-radius: 4px;
   z-index: 1;
 `
@@ -37,7 +37,7 @@ interface IDayPriceRange {
   currentPrice: number,
 }
 export const DayPriceRange: React.FC<IDayPriceRange> = ({ minPrice, maxPrice, currentPrice }) => {
-  const { colors } = useContext(ThemeContext)
+  const theme = useTheme()
 
   const currentPricePosition = (currentPrice - minPrice) * 100 / (maxPrice - minPrice)
   return (
@@ -47,12 +47,12 @@ export const DayPriceRange: React.FC<IDayPriceRange> = ({ minPrice, maxPrice, cu
         <DayPriceText>Диапазон цены</DayPriceText>
         <DayPriceText>{maxPrice}</DayPriceText>
       </DayPriceInfo>
-      <DayPriceRangeWrapper theme={colors}>
+      <DayPriceRangeWrapper theme={theme}>
         <DayPriceRangeCursor
           style={{
             left: `${currentPricePosition}%`
           }}
-          theme={colors}
+          theme={theme}
         />
       </DayPriceRangeWrapper>
     </div>

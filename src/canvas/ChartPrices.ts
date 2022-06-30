@@ -1,5 +1,5 @@
 import { ChartCore } from './ChartCore'
-import { IThemeColors } from '../context/ThemeContext'
+import { Theme } from '@mui/material'
 import { roundPrice } from '../utils/roundPrice'
 
 interface IChartPricesSettings {
@@ -19,7 +19,7 @@ class ChartPrices extends ChartCore {
   constructor(
     width: number,
     height: number,
-    colors: IThemeColors,
+    colors: Theme,
     ctx: CanvasRenderingContext2D,
   ) {
     super(width, height, ctx)
@@ -58,7 +58,7 @@ class ChartPrices extends ChartCore {
   }
   public drawCurrentPrice = (price: number, y: number) => {
     const rectHeight = this.textMetrics.height + 18 // padding vertical 9
-    this.ctx.fillStyle = this.settings.colors!.button
+    this.ctx.fillStyle = this.settings.colors!.palette.primary.main
     this.roundedRect(
       this.ctx,
       0,
@@ -67,7 +67,7 @@ class ChartPrices extends ChartCore {
       rectHeight,
       5,
     )
-    this.ctx.fillStyle = this.settings.colors!.text
+    this.ctx.fillStyle = this.settings.colors!.palette.text.primary
     this.ctx.fillText(
       roundPrice(price).toString(),
       (this.sizes.width - this.textMetrics.width) / 2,

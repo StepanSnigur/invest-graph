@@ -1,6 +1,7 @@
-import React, { useRef, useState, useEffect, useContext } from 'react'
+import React, { useRef, useState, useEffect } from 'react'
 import styled from 'styled-components'
-import { ThemeContext, IAppTheme } from '../context/ThemeContext'
+import { useTheme, Theme } from '@mui/material'
+import CircularProgress from '@mui/material/CircularProgress'
 import { ChartPrices } from './ChartPrices'
 import { autorun, reaction } from 'mobx'
 import { observer } from 'mobx-react-lite'
@@ -24,20 +25,29 @@ const CandleInfo = styled.div`
   position: absolute;
   top: 7px;
   left: 7px;
-  background: ${(props: IAppTheme) => props.theme.button};
+  background: ${({ theme }: { theme: Theme }) => theme.palette.secondary.main};
   padding: 6px 8px;
   border-radius: 8px;
   font-size: 14px;
-  color: ${(props: IAppTheme) => props.theme.text};
+  color: ${({ theme }: { theme: Theme }) => theme.palette.text.primary};
   opacity: .8;
   z-index: 3;
 `
 const ChartCanvas = styled.canvas`
   background: transparent;
-  border: 1px solid ${(props: IAppTheme) => props.theme.lightButton};
+  border: 1px solid ${({ theme }: { theme: Theme }) => theme.palette.secondary.main};
   border-top-left-radius: 12px;
   border-bottom-left-radius: 12px;
   z-index: 2;
+`
+const ProgressContainer = styled.div`
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  z-index: 3;
 `
 
 interface IChart {
@@ -63,9 +73,9 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
   })
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const chartWrapperRef = useRef<HTMLDivElement | null>(null)
-  const { colors } = useContext(ThemeContext)
+  const theme = useTheme()
 
-  useEffect(() => {
+  useEffect(() => { // set up all needed libraries
     // init event manager
     const debouncedDataCheck = debounce(() => chart.checkNewData(canvasSize.width), 1000)
     const events: IEvent[] = [
@@ -98,7 +108,6 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
     const eventsManager = new EventsManager(chartWrapperRef.current!, events)
 
     // draw chart
-    setIsLoading(true)
     const ctx = canvasRef.current!.getContext('2d')
     const { top, left } = canvasRef.current!.getBoundingClientRect()
     // chart width without a prices bar
@@ -111,17 +120,19 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
     const chartLibrary = ctx ? new ChartLibrary(
       canvasWidth,
       chartWrapperRef.current!.offsetHeight,
-      colors,
+      theme,
       ctx,
       {
         onCandleFocus: handleCandleFocus,
       },
     ) : null
-    if (canvasSize.width > 0) chartLibrary?.showPreloader()
+    chartLibrary?.setMaxCandlesOnScreenCount(chart.chartSettings.maxCandlesOnScreenCount)
+    chartLibrary?.setChartYScale(chart.chartSettings.scaleY)
     setChartLibrary(chartLibrary)
 
     const drawingLibrary = ctx ? new DrawingLibrary(canvasWidth, chartWrapperRef.current!.offsetHeight, ctx) : null
-    drawingLibrary?.setChartColors(colors)
+    drawingLibrary?.setChartColors(theme)
+    drawingLibrary?.setChartYScale(chart.chartSettings.scaleY)
     setDrawingLibrary(drawingLibrary)
 
     setChartPosition({
@@ -129,19 +140,16 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
       left,
     })
 
+    return eventsManager.removeListeners
+  }, [chartWrapperRef, theme, ticker, canvasSize.width])
+  useEffect(() => {
     const init = async () => {
-      chartLibrary?.setMaxCandlesOnScreenCount(chart.chartSettings.maxCandlesOnScreenCount)
-      chartLibrary?.setChartYScale(chart.chartSettings.scaleY)
-      drawingLibrary?.setChartYScale(chart.chartSettings.scaleY)
-
+      setIsLoading(true)
       await chart.loadChart(ticker)
-      chartLibrary?.hidePreloader()
       setIsLoading(false)
     }
-    (canvasSize.width > 0) && init()
-
-    return eventsManager.removeListeners
-  }, [chartWrapperRef, colors, ticker, canvasSize.width])
+    init()
+  }, [ticker])
 
   useEffect(() => reaction(
     () => chart.chartSettings.scaleY,
@@ -256,11 +264,14 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
   const currentCandle = chart.tickerData[chart.focusedCandleIdx ?? chart.tickerData.length - 1]
   return (
     <ChartWrapper ref={chartWrapperRef}>
+      {isLoading ? <ProgressContainer>
+        <CircularProgress />
+      </ProgressContainer> : null}
       <ChartCanvas
         ref={canvasRef}
         width={canvasSize.width}
         height={canvasSize.height}
-        theme={colors}
+        theme={theme}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
         onMouseDown={handleMouseDown}
@@ -280,7 +291,7 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
         width={canvasSize.width / 16}
         height={canvasSize.height}
       />
-      {chart.focusedCandleIdx ? <CandleInfo theme={colors}>
+      {chart.focusedCandleIdx ? <CandleInfo theme={theme}>
         МАКС {currentCandle?.high} | МИН {currentCandle?.low} | ОТКР {currentCandle?.open} | ЗАКР {currentCandle?.close}
       </CandleInfo> : null}
     </ChartWrapper>

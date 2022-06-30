@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef, useContext } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import styled from 'styled-components'
-import { ThemeContext, IAppTheme } from '../context/ThemeContext'
+import { useTheme, Theme } from '@mui/material'
 import { autorun, reaction } from 'mobx'
 import { observer } from 'mobx-react-lite'
 import { chart } from '../store/chart'
@@ -8,10 +8,10 @@ import { chartConnector } from '../store/chartConnector'
 import { ChartPrices as PricesChart } from '../canvas/ChartPrices'
 
 const PricesCanvas = styled.canvas`
-  background: ${(props: IAppTheme) => props.theme.secondaryBackground};
+  background: ${({ theme }: { theme: Theme }) => theme.palette.background.default};
   border-top-right-radius: 12px;
   border-bottom-right-radius: 12px;
-  border: 1px solid ${(props: IAppTheme) => props.theme.lightButton};
+  border: 1px solid ${({ theme }: { theme: Theme }) => theme.palette.primary.main};
 `
 
 interface IChartPrices {
@@ -21,7 +21,7 @@ interface IChartPrices {
 export const ChartPrices: React.FC<IChartPrices> = observer(({ width, height, }) => {
   const [pricesLibrary, setPricesLibrary] = useState<PricesChart | null>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
-  const { colors } = useContext(ThemeContext)
+  const theme = useTheme()
 
   useEffect(() => reaction(
     () => chart.chartSettings.scaleY,
@@ -45,23 +45,23 @@ export const ChartPrices: React.FC<IChartPrices> = observer(({ width, height, })
       const ctx = canvasRef.current?.getContext('2d')
 
       if (ctx) {
-        const pricesLibrary = new PricesChart(width, height, colors, ctx)
+        const pricesLibrary = new PricesChart(width, height, theme, ctx)
         pricesLibrary?.setChartYScale(chart.chartSettings.scaleY)
         pricesLibrary.drawChart()
         setPricesLibrary(pricesLibrary)
 
-        ctx.fillStyle = colors.text
+        ctx.fillStyle = theme.palette.text.primary
         ctx.font = '14px Trebuchet MS,roboto,ubuntu,sans-serif'
       }
     }
-  }, [width, height, colors, canvasRef])
+  }, [width, height, theme, canvasRef])
 
   return (
     <PricesCanvas
       ref={canvasRef}
       width={width}
       height={height}
-      theme={colors}
+      theme={theme}
     />
   )
 })
