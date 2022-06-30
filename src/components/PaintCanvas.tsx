@@ -1,5 +1,5 @@
-import React, { useRef, useEffect, useContext } from 'react'
-import { ThemeContext, IAppTheme } from '../context/ThemeContext'
+import React, { useRef, useEffect } from 'react'
+import { useTheme, Theme } from '@mui/material'
 import styled from 'styled-components'
 import { observer } from 'mobx-react-lite'
 import { autorun } from 'mobx'
@@ -12,7 +12,7 @@ const paintCanvasWorker = new Worker(paintCanvasWorkerScript)
 
 const PaintCanvasElement = styled.canvas`
   position: absolute;
-  background: ${(props: IAppTheme) => props.theme.secondaryBackground};
+  background: ${({ theme }: { theme: Theme }) => theme.palette.background.default};
   border-top-left-radius: 12px;
   border-bottom-left-radius: 12px;
   z-index: 1;
@@ -41,7 +41,7 @@ export const PaintCanvas: React.FC<IPaintCanvas> = observer(({
   y,
 }) => {
   const paintCanvasRef = useRef<HTMLCanvasElement | null>(null)
-  const { colors } = useContext(ThemeContext)
+  const theme = useTheme()
 
   useEffect(() => {
     if (paintCanvasRef.current && width && height) {
@@ -67,17 +67,17 @@ export const PaintCanvas: React.FC<IPaintCanvas> = observer(({
         scaleY: chart.chartSettings.scaleY,
         minPrice: chartConnector.data.minChartPrice,
         maxPrice: chartConnector.data.maxChartPrice,
-        chartColors: colors,
+        chartColors: JSON.stringify(theme),
       })
     })
-  }, [colors])
+  }, [theme])
 
   return (
     <PaintCanvasElement
       ref={paintCanvasRef}
       width={width}
       height={height}
-      theme={colors}
+      theme={theme}
     >
       Браузер не поддерживает Canvas
     </PaintCanvasElement>

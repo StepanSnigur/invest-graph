@@ -2,8 +2,7 @@ import { ChartCore } from './ChartCore'
 import { chartConnector } from '../store/chartConnector'
 import { ITickerData } from '../store/chart'
 import { isStockGoingUp } from '../utils/isStockGoingUp'
-import { IThemeColors } from '../context/ThemeContext'
-import { Preloader } from './Preloader'
+import { Theme } from '@mui/material'
 import errorImageUrl from '../assets/images/error-icon.png'
 import alertImageUrl from '../assets/images/alert.png'
 
@@ -26,12 +25,11 @@ class Chart extends ChartCore {
   private handlers: IChartHandlers = {
     onCandleFocus: () => {}
   }
-  private preloaderAnimationId: ReturnType<typeof requestAnimationFrame> | null = null
   private chartCandles: IChartCandle[] = []
   private focusedCandle: IChartCandle | null = null
   private tempFocusedCandle: IChartCandle | null = null
 
-  constructor(width: number, height: number, colors: IThemeColors, ctx: CanvasRenderingContext2D, handlers: IChartHandlers) {
+  constructor(width: number, height: number, colors: Theme, ctx: CanvasRenderingContext2D, handlers: IChartHandlers) {
     super(width, height, ctx)
     this.handlers = {
       ...this.handlers,
@@ -44,7 +42,7 @@ class Chart extends ChartCore {
     this.settings.maxCandlesOnScreenCount = count
   }
   public drawChartCells = () => {
-    this.ctx.strokeStyle = this.settings.colors!.button
+    this.ctx.strokeStyle = this.settings.colors!.palette.primary.main
     this.ctx.lineWidth = 1
     this.ctx.setLineDash([])
 
@@ -120,7 +118,8 @@ class Chart extends ChartCore {
     cursorData: ICursorData,
   ) => {
     if (!this.settings.colors) throw new Error('You must provide colors to chart')
-    const { stockUp, stockDown } = this.settings.colors
+    const stockUp = this.settings.colors.palette.success.main
+    const stockDown = this.settings.colors.palette.error.main
     const gapBetweenColumns = defaultColumnWidth * 0.15 // 15% of column width
 
     data.forEach((tickerData, i) => {
@@ -186,13 +185,13 @@ class Chart extends ChartCore {
       : null).filter(el => el !== null)
 
     const dateWidth = this.sizes.width / datesOnScreenCount
-    this.ctx.fillStyle = this.settings.colors?.text || '#000'
+    this.ctx.fillStyle = this.settings.colors?.palette.text.primary || '#000'
     dates.forEach((candle, i) => {
       candle && this.ctx.fillText(candle.datetime, i * dateWidth + offsetX, this.sizes.height - this.settings.datePadding)
     })
   }
   private drawChartCursor = (cursorData: ICursorData) => {
-    this.ctx.strokeStyle = this.settings.colors?.text || '#000'
+    this.ctx.strokeStyle = this.settings.colors?.palette.text.primary || '#000'
     this.setCursorPosition(cursorData.x, cursorData.y)
   }
   private getPricePositionOnChart = (price: number, minPrice: number, pricesRange: number) => {
@@ -229,7 +228,7 @@ class Chart extends ChartCore {
     }
     const xPosition = x - currentDateSizes.width / 2
 
-    this.ctx.fillStyle = this.settings.colors!.button
+    this.ctx.fillStyle = this.settings.colors!.palette.primary.main
     this.roundedRect(
       this.ctx, xPosition,
       this.sizes.height - currentDateSizes.height,
@@ -238,35 +237,15 @@ class Chart extends ChartCore {
       5,
     )
 
-    this.ctx.fillStyle = this.settings.colors!.text
+    this.ctx.fillStyle = this.settings.colors!.palette.text.primary
     this.ctx.fillText(date, xPosition + 15, this.sizes.height - currentDateSizes.height / 2 + 3)
-  }
-  public showPreloader = () => {
-    if (!this.settings.colors) throw new Error('You must provide colors to chart')
-
-    const preloader = new Preloader(this.ctx, {
-      x: this.sizes.width / 2,
-      y: this.sizes.height / 2,
-      radius: 20,
-      width: 2,
-      color: this.settings.colors.lightButton,
-    })
-
-    const animation = () => {
-      preloader.draw()
-      this.preloaderAnimationId = requestAnimationFrame(animation)
-    }
-    requestAnimationFrame(animation)
-  }
-  public hidePreloader = () => {
-    this.preloaderAnimationId && cancelAnimationFrame(this.preloaderAnimationId)
   }
   private getCandle = (cursorX: number) => {
     return this.chartCandles
       .find((candle) => cursorX >= candle.x && cursorX <= candle.x + candle.width) || null
   }
   private drawCandleBorder = (x: number, y: number, width: number, height: number) => {
-    this.ctx.strokeStyle = this.settings.colors!.text
+    this.ctx.strokeStyle = this.settings.colors!.palette.text.primary
     this.ctx.lineWidth = this.settings.focusedCandleBorderWidth * 2
     this.ctx.setLineDash([])
     this.ctx.strokeRect(x, y, width, height)
@@ -274,7 +253,7 @@ class Chart extends ChartCore {
 
   public showErrorMessage = (message: string) => {
     this.clearCanvas()
-    this.ctx.fillStyle = this.settings.colors!.text
+    this.ctx.fillStyle = this.settings.colors!.palette.text.primary
     this.ctx.font = '24px sans-serif'
 
     const { width } = this.ctx.measureText(message)
@@ -299,7 +278,7 @@ class Chart extends ChartCore {
     }
 
     this.ctx.font = '18px Trebuchet MS,roboto,ubuntu,sans-serif'
-    this.ctx.fillStyle = color || this.settings.colors.alert
+    this.ctx.fillStyle = color || this.settings.colors.palette.error.main
     const textMetrics = this.ctx.measureText(message)
     const textHeight = textMetrics.actualBoundingBoxAscent + textMetrics.actualBoundingBoxDescent
 
@@ -316,7 +295,7 @@ class Chart extends ChartCore {
       5,
     )
 
-    this.ctx.fillStyle = this.settings.colors.darkText
+    this.ctx.fillStyle = this.settings.colors.palette.text.secondary
     this.ctx.fillText(
       message,
       ALERT_MESSAGE_POSITION.x + messageWidth / 2 - textMetrics.width / 2 + alertImageSize,

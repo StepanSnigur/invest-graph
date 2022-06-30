@@ -1,8 +1,8 @@
-import React, { useContext, useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useHistory } from 'react-router-dom'
 import { observer } from 'mobx-react-lite'
 import { tickersSearch, ISearchedTicker } from '../store/tickersSearch'
-import { ThemeContext, IAppTheme } from '../context/ThemeContext'
+import { useTheme, Theme } from '@mui/material'
 import styled, { keyframes } from 'styled-components'
 import historyIcon from '../assets/images/history-icon.png'
 import { tickerQueriesSaver } from '../utils/tickerQueriesSaver'
@@ -49,7 +49,7 @@ const SearchResultsWrapper = styled.div`
   width: 200px;
   padding: 10px;
   border-radius: 8px;
-  background: ${(props: IAppTheme) => props.theme.button};
+  background: ${({ theme }: { theme: Theme }) => theme.palette.secondary.main};
   z-index: 999;
 `
 const SearchResult = styled.button<SearchResultProps>`
@@ -62,23 +62,23 @@ const SearchResult = styled.button<SearchResultProps>`
   border-radius: 8px;
   padding: 7px 24px 7px 12px;
   background: none;
-  color: ${(props: SearchResultProps) => props.theme.text};
+  color: ${(props: SearchResultProps) => props.theme.palette.text.primary};
   text-align: left;
   font-size: 16px;
   cursor: pointer;
   transition: all 0.3s;
 
   span:last-child {
-    color: ${(props: SearchResultProps) => props.theme.darkText};
+    color: ${(props: SearchResultProps) => props.theme.palette.text.secondary};
     font-size: 11px;
     transition: .3s;
   }
 
   &:hover {
-    background: ${(props: SearchResultProps) => props.theme.secondaryBackground};
+    background: ${(props: SearchResultProps) => props.theme.palette.secondary.main};
 
     span:last-child {
-      color: ${(props: SearchResultProps) => props.theme.text};
+      color: ${(props: SearchResultProps) => props.theme.palette.text.primary};
     }
   }
   &:before {
@@ -92,7 +92,7 @@ const SearchResult = styled.button<SearchResultProps>`
 const ResultsDivider = styled.div`
   width: 100%;
   height: 1px;
-  background: ${(props: IAppTheme) => props.theme.text};
+  background: ${({ theme }: { theme: Theme }) => theme.palette.text.primary};
   margin: 5px 0;
 `
 
@@ -102,11 +102,11 @@ interface ITickerButton {
   isFromStorage?: boolean,
 }
 const TickerButton: React.FC<ITickerButton> = ({ ticker, onTickerClick, isFromStorage = false }) => {
-  const { colors } = useContext(ThemeContext)
+  const theme = useTheme()
 
   return (
     <SearchResult
-      theme={colors}
+      theme={theme}
       isFromStorage={isFromStorage}
       onClick={() => onTickerClick(ticker)}
       title={ticker.instrument_name}
@@ -120,13 +120,13 @@ const TickerButton: React.FC<ITickerButton> = ({ ticker, onTickerClick, isFromSt
   )
 }
 
-type SearchResultProps = IAppTheme & { isFromStorage?: boolean }
+type SearchResultProps = { theme: Theme } & { isFromStorage?: boolean }
 interface ISearchResults {
   isVisible: boolean,
 }
 const SearchResults: React.FC<ISearchResults> = observer(({ isVisible }) => {
   const [lastSearches, setLastSearches] = useState<ISearchedTicker[]>([])
-  const { colors } = useContext(ThemeContext)
+  const theme = useTheme()
   const history = useHistory()
 
   useEffect(() => { // get recent ticker searches
@@ -142,13 +142,13 @@ const SearchResults: React.FC<ISearchResults> = observer(({ isVisible }) => {
   if (!isVisible) return null
   return (
     <HideLayout onClick={tickersSearch.handleInputBlur}>
-      <SearchResultsWrapper theme={colors}>
+      <SearchResultsWrapper theme={theme}>
         {tickersSearch.isSearching
           ? <Preloader size={24} marginVertical={15} />
           : tickersSearch.searchedTickers.map((ticker, i) => <TickerButton ticker={ticker} key={i} onTickerClick={handleTickerClick} />)}
 
         {lastSearches.length && (tickersSearch.searchedTickers.length || tickersSearch.isSearching)
-          ? <ResultsDivider theme={colors} />
+          ? <ResultsDivider theme={theme} />
           : null}
 
         {lastSearches.map((ticker, i) => <TickerButton ticker={ticker} key={i} onTickerClick={handleTickerClick} isFromStorage={true} />)}

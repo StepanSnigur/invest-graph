@@ -2,6 +2,7 @@ import React, { useContext } from 'react'
 import { observer } from 'mobx-react-lite'
 import styled from 'styled-components'
 import { ThemeContext } from '../context/ThemeContext'
+import { useTheme } from '@mui/material'
 import { tickersSearch } from '../store/tickersSearch'
 import { chartSketches } from '../store/chartSketches'
 
@@ -43,11 +44,8 @@ interface IGraph {
   id: string
 }
 export const Graph: React.FC<IGraph> = observer(({ id }) => {
+  const theme = useTheme()
   const themeContext = useContext(ThemeContext)
-
-  const handleChangeTheme = () => {
-    themeContext.setDarkTheme(!themeContext.darkTheme)
-  }
 
   const sidebarButtons = [
     {background: 'inherit', buttons: [
@@ -76,8 +74,8 @@ export const Graph: React.FC<IGraph> = observer(({ id }) => {
     {background: 'inherit', buttons: [
       {
         background: '#7739FE',
-        icon: themeContext.darkTheme ? moonIcon : sunIcon,
-        onClick: handleChangeTheme,
+        icon: theme.palette.mode === 'dark' ? moonIcon : sunIcon,
+        onClick: themeContext.toggleColorMode,
       },
       { background: '#7739FE', icon: settingsIcon, onClick: () => console.log('settings') },
     ]},

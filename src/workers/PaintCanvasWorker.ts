@@ -1,5 +1,5 @@
 import { ISketch, ISketchPoint, IChartDrawing } from '../store/chartSketches'
-import { IThemeColors } from '../context/ThemeContext'
+import { Theme } from '@mui/material'
 
 interface IPaintData {
   sketches: string,
@@ -7,7 +7,7 @@ interface IPaintData {
   maxPrice: number,
   offsetX: number,
   scaleY: number,
-  chartColors: IThemeColors,
+  chartColors: string,
 }
 const paintCanvasWorker = () => {
   const drawLines = (ctx: CanvasRenderingContext2D, points: number[]) => {
@@ -110,13 +110,13 @@ const paintCanvasWorker = () => {
       maxPrice: number,
       height: number,
       scaleY: number,
-      chartColors: IThemeColors,
+      chartColors: Theme,
     ) {
       const fromYOffset = getPricePosition(from.y, minPrice, maxPrice, height, scaleY)
       const toYOffset = getPricePosition(to.y, minPrice, maxPrice, height, scaleY)
   
       ctx.beginPath()
-      ctx.strokeStyle = chartColors.button
+      ctx.strokeStyle = chartColors.palette.primary.main
       ctx.setLineDash([])
       ctx.lineWidth = 3
       ctx.moveTo(from.x + offsetX, fromYOffset)
@@ -133,7 +133,7 @@ const paintCanvasWorker = () => {
       maxPrice: number,
       canvasHeight: number,
       scaleY: number,
-      chartColors: IThemeColors,
+      chartColors: Theme,
     ) {
       const fromYOffset = getPricePosition(from.y, minPrice, maxPrice, canvasHeight, scaleY)
       const toYOffset = getPricePosition(to.y, minPrice, maxPrice, canvasHeight, scaleY)
@@ -143,7 +143,9 @@ const paintCanvasWorker = () => {
       const startPrice = getCurrentPrice(fromYOffset, canvasHeight, scaleY, minPrice, maxPrice)
       const endPrice = getCurrentPrice(toYOffset, canvasHeight, scaleY, minPrice, maxPrice)
       const percent = Math.abs(startPrice - endPrice) * 100 / Math.max(startPrice, endPrice)
-      const fillColor = startPrice > endPrice ? chartColors.stockDown : chartColors.stockUp
+      const stockUp = chartColors.palette.success.main //this.settings.colors.palette.success.main
+      const stockDown = chartColors.palette.error.main
+      const fillColor = startPrice > endPrice ? stockDown : stockUp
   
   
       ctx.setLineDash([])
@@ -212,6 +214,9 @@ const paintCanvasWorker = () => {
   }
   
   const drawCurve = (ctx: CanvasRenderingContext2D, height: number, paintData: IPaintData) => {
+    const colors = JSON.parse(paintData.chartColors)
+    ctx.strokeStyle = colors.palette.primary.main
+    ctx.lineWidth = 2
     JSON.parse(paintData.sketches).forEach((sketch: ISketch) => {
       ctx.beginPath()
       const mappedPoints = moveCurvePoints(
@@ -239,7 +244,7 @@ const paintCanvasWorker = () => {
       maxPrice,
       height,
       scaleY,
-      chartColors,
+      JSON.parse(chartColors),
     )
   }
 

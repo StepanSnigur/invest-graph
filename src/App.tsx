@@ -1,4 +1,3 @@
-import React, { useContext } from 'react'
 import {
   BrowserRouter as Router,
   Switch,
@@ -6,22 +5,22 @@ import {
 } from 'react-router-dom'
 import styled from 'styled-components'
 
-import { ThemeContext, IAppTheme } from './context/ThemeContext'
+import { useTheme, Theme } from '@mui/material'
 import { Main } from './pages/Main'
 import { Graph } from './pages/Graph'
 
 const MainWrapper = styled.div`
-  background: ${({ theme }: IAppTheme) => theme.mainBackground};
+  background: ${({ theme }: { theme: Theme }) => theme.palette.background.paper};
   min-height: 100vh;
 `
 
 const App = () => {
-  const themeContext = useContext(ThemeContext)
+  const theme = useTheme()
 
   return (
     <Router>
       <Switch>
-        <MainWrapper theme={themeContext.colors}>
+        <MainWrapper theme={theme}>
           <Route path="/" exact component={Main} />
           <Route path="/graph/:id" render={({ match }) => {
             return <Graph id={match.params.id} />
