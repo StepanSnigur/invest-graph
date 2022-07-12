@@ -5,6 +5,7 @@ import { useTheme, Theme } from '@mui/material'
 import { tickersSearch } from '../store/tickersSearch'
 import { ChartIntervalButton } from './ChartIntervalButton'
 import { SearchResults } from './SearchResults'
+import Switch from '@mui/material/Switch'
 
 const ChartControlsWrapper = styled.div`
   height: 6%;
@@ -44,6 +45,7 @@ const ChartInput = styled.input`
 
 export const ChartControls = observer(() => {
   const [searchInputValue, setSearchInputValue] = useState('')
+  const [autoUpdate, setAutoUpdate] = useState(false)
   const theme = useTheme()
   const searchInputRef = useRef<HTMLInputElement | null>(null)
 
@@ -57,13 +59,20 @@ export const ChartControls = observer(() => {
     setSearchInputValue(e.target.value)
     tickersSearch.getTickers(e.target.value)
   }
+  const handleAutoUpdateSwitch = (e: React.MouseEvent<HTMLButtonElement>) => {
+    setAutoUpdate(prevState => !prevState)
+    e.preventDefault()
+  }
 
   return (
     <ChartControlsWrapper>
       <ButtonsBlock>
-        <ControlButton theme={theme}>test</ControlButton>
-        <ControlButton theme={theme}>test</ControlButton>
-        <ControlButton theme={theme}>test</ControlButton>
+        <ControlButton theme={theme} onClick={handleAutoUpdateSwitch}>
+          <Switch checked={autoUpdate} />
+          автообновление
+        </ControlButton>
+        <ControlButton theme={theme}>создать оповещение</ControlButton>
+        <ControlButton theme={theme}>изменить вид графика</ControlButton>
       </ButtonsBlock>
       <ChartInput
         placeholder="Введите тикер"

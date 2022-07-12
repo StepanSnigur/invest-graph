@@ -44,6 +44,11 @@ export const ThemeContextProvider: React.FC = ({ children }) => {
   const theme = useMemo(() => createTheme({
     palette: {
       mode,
+      text: mode === 'dark' ? {
+        primary: '#b2b5be',
+      } : {
+        primary: '#b2b5be',
+      },
       background: mode === 'dark' ? {
         default: '#141431',
         paper: '#2a263d',
