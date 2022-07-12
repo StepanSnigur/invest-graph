@@ -1,4 +1,6 @@
 import React from 'react'
+import { observer } from 'mobx-react-lite'
+import { chartConnector } from '../store/chartConnector'
 import styled from 'styled-components'
 import { useTheme, Theme } from '@mui/material'
 
@@ -32,12 +34,12 @@ const DayPriceRangeCursor = styled.div`
 `
 
 interface IDayPriceRange {
-  minPrice: number,
-  maxPrice: number,
   currentPrice: number,
 }
-export const DayPriceRange: React.FC<IDayPriceRange> = ({ minPrice, maxPrice, currentPrice }) => {
+export const DayPriceRange: React.FC<IDayPriceRange> = observer(({ currentPrice }) => {
   const theme = useTheme()
+  const minPrice = chartConnector.data.minChartPrice
+  const maxPrice = chartConnector.data.maxChartPrice
 
   const currentPricePosition = (currentPrice - minPrice) * 100 / (maxPrice - minPrice)
   return (
@@ -57,4 +59,4 @@ export const DayPriceRange: React.FC<IDayPriceRange> = ({ minPrice, maxPrice, cu
       </DayPriceRangeWrapper>
     </div>
   )
-}
+})
