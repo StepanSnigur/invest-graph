@@ -1,7 +1,6 @@
 import React from 'react'
 import { observer } from 'mobx-react-lite'
 import { chart } from '../store/chart'
-import { chartConnector } from '../store/chartConnector'
 import styled, { keyframes } from 'styled-components'
 import { useTheme, Theme } from '@mui/material'
 
@@ -155,8 +154,6 @@ export const ChartSidebar = observer(() => {
         </PriceSection>
 
         <DayPriceRange
-          minPrice={chartConnector.data.minChartPrice}
-          maxPrice={chartConnector.data.maxChartPrice}
           currentPrice={lastPrice}
         />
 
