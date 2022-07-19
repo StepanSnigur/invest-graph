@@ -47,24 +47,24 @@ export const ThemeContextProvider: React.FC = ({ children }) => {
       text: mode === 'dark' ? {
         primary: '#b2b5be',
       } : {
-        primary: '#b2b5be',
+        primary: '#181717',
       },
       background: mode === 'dark' ? {
         default: '#141431',
         paper: '#2a263d',
       } : {
-        default: '#1a1a24',
-        paper: '#1d1e20',
+        default: '#fff',
+        paper: '#fff',
       },
       primary: mode === 'dark' ? {
         main: '#26264f',
       } : {
-        main: '#7c96af',
+        main: '#2962ff',
       },
       secondary: mode === 'dark' ? {
         main: '#3b3853',
       } : {
-        main: '#303b51',
+        main: '#2962ff',
       },
     },
   }), [mode])

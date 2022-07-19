@@ -41,6 +41,10 @@ const ChartInput = styled.input`
   border-radius: 8px;
   padding: 0 10px;
   z-index: 999;
+
+  ::placeholder {
+    color: ${({ theme }: { theme: Theme }) => theme.palette.text.primary};
+  }
 `
 
 export const ChartControls = observer(() => {
