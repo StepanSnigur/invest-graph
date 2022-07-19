@@ -88,7 +88,7 @@ const TickerInfoCard = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #3b3853;
+  background: ${({ theme }: { theme: Theme }) => theme.palette.secondary.main};
   border-radius: 16px;
 
   div {
@@ -171,28 +171,28 @@ export const ChartSidebar = observer(() => {
         />
 
         <TickerInfoWrapper>
-          <TickerInfoCard>
+          <TickerInfoCard theme={theme}>
             <img src={capitalizationIcon} alt="Капитализация" />
             <div>
               <span>Капитализация</span>
               <span>{chart.tickerStatistics?.valuations_metrics.market_capitalization || '-'}$</span>
             </div>
           </TickerInfoCard>
-          <TickerInfoCard>
+          <TickerInfoCard theme={theme}>
             <img src={dividendsIcon} alt="Дивиденды" />
             <div>
               <span>Дивиденды <br /> {chart.tickerStatistics?.dividends_and_splits.dividend_date}</span>
               <span>{chart.tickerStatistics?.dividends_and_splits.trailing_annual_dividend_rate || '-'}%</span>
             </div>
           </TickerInfoCard>
-          <TickerInfoCard>
+          <TickerInfoCard theme={theme}>
             <img src={volumeIcon} alt="Количество проторгованных акций" />
             <div>
               <span>Volume</span>
               <span>{tickerData[tickerData.length - 1].volume}</span>
             </div>
           </TickerInfoCard>
-          {Object.keys(chart.tickerIndicators).map((indicator, i) => <TickerInfoCard key={i}>
+          {Object.keys(chart.tickerIndicators).map((indicator, i) => <TickerInfoCard key={i} theme={theme}>
             <img src={researchIcon} alt={indicator} />
             <div>
               <span>{indicator.toUpperCase()}</span>

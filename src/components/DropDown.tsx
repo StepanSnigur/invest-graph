@@ -54,7 +54,7 @@ const DropDownOptionsWrapper = styled.div`
 const DropDownOption = styled.button`
   padding: 7px 0;
   margin-bottom: 3px;
-  color: #dcdccc;
+  color: ${({ theme }: { theme: Theme }) => theme.palette.text.primary};
   background: ${({ theme }: { theme: Theme }) => theme.palette.secondary.main};
   border: none;
   border-radius: 8px;
