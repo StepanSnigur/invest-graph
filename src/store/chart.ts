@@ -45,6 +45,15 @@ export interface IChartSettings {
   scaleY: number,
   interval: string,
 }
+interface IMarketState {
+  name: string,
+  code: string,
+  country: string,
+  is_market_open: boolean,
+  time_after_open: string,
+  time_to_open: string,
+  time_to_close: string,
+}
 
 class Chart {
   tickerData: ITickerData[] = []
@@ -55,6 +64,7 @@ class Chart {
     adx: null,
   }
   tickerStatistics: ITickerStatistics | null = null
+  marketState: IMarketState | null = null
 
   chartData: IChartData = {
     currentPrice: null,
@@ -100,6 +110,10 @@ class Chart {
       const tickerIndicators = await chartApi.getTickerIndicators(ticker, Object.keys(this.tickerIndicators), interval)
       const tickerStatistics = await chartApi.getTickerStatistics(ticker)
 
+      const micCode = tickerData.meta.mic_code
+      const marketState: IMarketState[] = await chartApi.getMarketState(micCode)
+      this.setMarketState(marketState[0])
+
       this.setTickerMeta({ ...tickerInfo.meta, logo: tickerInfo.url, currency: tickerData.meta.currency})
       this.setTickerData(tickerData.values.reverse())
       this.setTickerIndicators(tickerIndicators)
@@ -127,6 +141,9 @@ class Chart {
   }
   setTickerStatistics = (data: ITickerStatistics) => {
     this.tickerStatistics = data
+  }
+  setMarketState = (marketState: IMarketState) => {
+    this.marketState = marketState
   }
   setError = (error: string) => {
     this.error = error

@@ -104,6 +104,18 @@ const TickerInfoCard = styled.div`
     opacity: .6;
   }
 `
+const IsBiddingGoingOn = styled.div`
+  display: flex;
+  align-items: center;
+`
+const IsBiddingGoingOnLabel = styled.label`
+  display: block;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: ${({ theme, isMarketOpen }: { theme: Theme, isMarketOpen: boolean }) => isMarketOpen ? theme.palette.success.main : theme.palette.error.main};
+  margin-left: 10px;
+`
 
 export const ChartSidebar = observer(() => {
   const theme = useTheme()
@@ -117,6 +129,7 @@ export const ChartSidebar = observer(() => {
     return <ChartSidebarSkeleton />
   }
 
+  const isMarketOpen = chart.marketState?.is_market_open || false
   const lastPriceIdx = tickerData.length - 1
   const oldPrice = +tickerData[0].open
   const lastPrice = +tickerData[lastPriceIdx].close
@@ -186,6 +199,14 @@ export const ChartSidebar = observer(() => {
               <span>{chart.tickerIndicators[indicator]}</span>
             </div>
           </TickerInfoCard>)}
+          <IsBiddingGoingOn>
+            Статус биржи:
+            <IsBiddingGoingOnLabel
+              theme={theme}
+              isMarketOpen={isMarketOpen}
+              title={isMarketOpen ? 'Биржа открыта' : 'Биржа закрыта'}
+            />
+          </IsBiddingGoingOn>
         </TickerInfoWrapper>
       </div>
     </ChartSidebarWrapper>
