@@ -10,6 +10,7 @@ describe('settingsSaver', () => {
 
   it('Correct check default settings', () => {
     const defaultSettings = {
+      autoUpdate: true,
       interval: '1min',
       maxCandlesOnScreenCount: 150,
       scaleY: 0.9,
