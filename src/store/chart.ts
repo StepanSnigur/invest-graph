@@ -1,6 +1,8 @@
 import { makeAutoObservable, runInAction, observe } from 'mobx'
 import { chartApi } from '../api/ChartApi'
+import { webSocketApi } from '../api/webSocketApi'
 import { settingsSaver } from '../utils/settingsSaver'
+import { convertUnixDate, getUnixDate, getTimestampsDiff, IConvertedTimestampsDiff } from '../utils/unixDateConverter'
 
 export interface ITickerData {
   datetime: string,
@@ -43,7 +45,11 @@ interface ITickerStatistics {
 export interface IChartSettings {
   maxCandlesOnScreenCount: number,
   scaleY: number,
-  interval: string,
+  interval: keyof IConvertedTimestampsDiff,
+  autoUpdate: boolean,
+}
+interface ICanvasElementData {
+  width: number,
 }
 interface IMarketState {
   name: string,
@@ -53,6 +59,16 @@ interface IMarketState {
   time_after_open: string,
   time_to_open: string,
   time_to_close: string,
+}
+interface ISocketData {
+  event: string,
+  symbol: string,
+  currency: string,
+  exchange: string,
+  type: string,
+  timestamp: number,
+  price: number,
+  day_volume: number,
 }
 
 class Chart {
@@ -83,6 +99,10 @@ class Chart {
     maxCandlesOnScreenCount: 150,
     scaleY: 0.9,
     interval: '1min',
+    autoUpdate: true,
+  }
+  canvasElementData: ICanvasElementData = {
+    width: 0,
   }
 
   constructor() {
@@ -103,7 +123,7 @@ class Chart {
   }
   loadChart = async (ticker: string) => {
     this.setDefaultData()
-    const { maxCandlesOnScreenCount, interval } = this.chartSettings
+    const { maxCandlesOnScreenCount, interval, autoUpdate } = this.chartSettings
     try {
       const tickerData = await chartApi.getChart(ticker, maxCandlesOnScreenCount, interval)
       const tickerInfo = await chartApi.getTickerMeta(ticker)
@@ -118,10 +138,58 @@ class Chart {
       this.setTickerData(tickerData.values.reverse())
       this.setTickerIndicators(tickerIndicators)
       this.setTickerStatistics(tickerStatistics.statistics)
+
+      if (autoUpdate) {
+        this.subscribeToUpdates(ticker)
+      }
     } catch (e) {
       this.setError('Не удалось загрузить график')
     }
   }
+
+  // websockets
+  subscribeToUpdates = (ticker: string) => {
+    const handleSocketMessage = (event: MessageEvent) => {
+      const data = JSON.parse(event.data)
+      if (data.event === 'price') {
+        this.handleSocketMessage(JSON.parse(event.data))
+      }
+    }
+
+    webSocketApi.openConnection(ticker, handleSocketMessage)
+  }
+  handleSocketMessage = (data: ISocketData) => {
+    this.addBarToChart(data.price?.toString(), data.timestamp, data.day_volume?.toString())
+  }
+  addBarToChart = (price: string, timestamp: number, volume: string) => {
+    const datetime = convertUnixDate(timestamp)
+    const lastBar = this.tickerData.at(-1)
+    const lastDate = lastBar?.datetime
+    const unixLastDate = getUnixDate(lastDate || '')
+
+    const { interval } = this.chartSettings
+    const timestampsDiff = timestamp - unixLastDate
+    const convertedTimestampsDiff = getTimestampsDiff(timestampsDiff)
+    const isUpdateNeeded = convertedTimestampsDiff[interval]
+
+    if (isUpdateNeeded) {
+      const bar: ITickerData = {
+        datetime,
+        open: lastBar?.close || price,
+        high: price,
+        low: price,
+        close: price,
+        volume,
+      }
+      this.tickerData.push(bar)
+
+      const columnWidth = this.canvasElementData.width / this.chartSettings.maxCandlesOnScreenCount
+      this.setOffsetX(-columnWidth)
+      this.setPrevOffsetX()
+      this.setPrevDrawingsOffsetX()
+    }
+  }
+
   moveCursor = (x: number, y: number) => {
     this.chartData.cursorX = x
     this.chartData.cursorY = y
@@ -169,10 +237,10 @@ class Chart {
     this.chartData.offsetX = this.chartData.offsetX - shift
   }
 
-  checkNewData = async (canvasWidth: number) => {
+  checkNewData = async () => {
     try {
       if (this.chartData.offsetX > 0) {
-        const columnWidth = canvasWidth / this.chartSettings.maxCandlesOnScreenCount
+        const columnWidth = this.canvasElementData.width / this.chartSettings.maxCandlesOnScreenCount
         const columnsToGet = Math.ceil(this.chartData.offsetX / columnWidth)
 
         const newChartCandles = await this.getNewChartCandles(columnsToGet, this.tickerData[0].datetime)
@@ -203,10 +271,16 @@ class Chart {
       this.chartSettings.scaleY = newScale
     }
   }
-  setInterval = (interval: string) => {
+  setInterval = (interval: keyof IConvertedTimestampsDiff) => {
     if (interval !== this.chartSettings.interval) {
       this.chartSettings.interval = interval
     }
+  }
+  changeIsAutoUpdate = () => {
+    this.chartSettings.autoUpdate = !this.chartSettings.autoUpdate
+  }
+  setCanvasElementWidth = (width: number) => {
+    this.canvasElementData.width = width
   }
 
   showAlertMessage = (message: string, timeout: number = 3000) => {

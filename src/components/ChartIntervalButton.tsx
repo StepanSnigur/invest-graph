@@ -2,6 +2,7 @@ import React, { useState, useLayoutEffect } from 'react'
 import { observer } from 'mobx-react-lite'
 import { chart } from '../store/chart'
 import { DropDown } from './DropDown'
+import { IConvertedTimestampsDiff } from '../utils/unixDateConverter'
 
 const ChartIntervalButton = observer(() => {
   const [currentOptionIndex, setCurrentOptionIndex] = useState(0)
@@ -24,7 +25,7 @@ const ChartIntervalButton = observer(() => {
   const handleChartIntervalChange = (optionIdx: number) => {
     if (chart.chartSettings.interval !== intervalOptions[optionIdx].name) {
       setCurrentOptionIndex(optionIdx)
-      chart.setInterval(intervalOptions[optionIdx].name)
+      chart.setInterval(intervalOptions[optionIdx].name as keyof IConvertedTimestampsDiff)
       chart.loadChart(chart.tickerMeta!.symbol)
     }
   }

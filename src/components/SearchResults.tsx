@@ -142,7 +142,7 @@ const SearchResults: React.FC<ISearchResults> = observer(({ isVisible }) => {
   if (!isVisible) return null
   return (
     <HideLayout onClick={tickersSearch.handleInputBlur}>
-      <SearchResultsWrapper theme={theme}>
+      {(tickersSearch.searchedTickers.length || lastSearches.length) ? <SearchResultsWrapper theme={theme}>
         {tickersSearch.isSearching
           ? <Preloader size={24} marginVertical={15} />
           : tickersSearch.searchedTickers.map((ticker, i) => <TickerButton ticker={ticker} key={i} onTickerClick={handleTickerClick} />)}
@@ -152,7 +152,7 @@ const SearchResults: React.FC<ISearchResults> = observer(({ isVisible }) => {
           : null}
 
         {lastSearches.map((ticker, i) => <TickerButton ticker={ticker} key={i} onTickerClick={handleTickerClick} isFromStorage={true} />)}
-      </SearchResultsWrapper>
+      </SearchResultsWrapper> : null}
     </HideLayout>
   )
 })

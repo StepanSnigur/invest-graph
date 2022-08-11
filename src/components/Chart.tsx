@@ -77,14 +77,15 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
 
   useEffect(() => { // set up all needed libraries
     // init event manager
-    const debouncedDataCheck = debounce(() => chart.checkNewData(canvasSize.width), 1000)
+    chart.setCanvasElementWidth(canvasSize.width)
+    const debouncedDataCheck = debounce(() => chart.checkNewData(), 1000)
     const events: IEvent[] = [
       { // resize by x
         buttons: ['x'],
         wheelSpinning: true,
         handler: (delta: number) => {
           chart.setMaxCandlesOnScreenCount(delta / 10)
-          chart.checkNewData(canvasSize.width)
+          chart.checkNewData()
         },
       },
       { // scroll
@@ -222,7 +223,7 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
     setDragData({
       startX: null,
     })
-    await chart.checkNewData(canvasSize.width)
+    await chart.checkNewData()
     chart.setPrevOffsetX()
     chart.setPrevDrawingsOffsetX()
     if (chartSketches.isDrawing) {
