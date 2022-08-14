@@ -4,7 +4,6 @@ import { ITickerData } from '../store/chart'
 import { isStockGoingUp } from '../utils/isStockGoingUp'
 import { Theme } from '@mui/material'
 import errorImageUrl from '../assets/images/error-icon.png'
-import alertImageUrl from '../assets/images/alert.png'
 
 interface IChartHandlers {
   onCandleFocus: (candleIdx: number) => void
@@ -268,48 +267,6 @@ class Chart extends ChartCore {
       this.sizes.height / 2 - ERROR_IMAGE_SIZE * 1.5,
       ERROR_IMAGE_SIZE,
       ERROR_IMAGE_SIZE,
-    )
-  }
-  public showAlertMessage = (message: string, color?: string) => {
-    if (!this.settings.colors) throw new Error('Canvas context is not defined')
-    const ALERT_MESSAGE_POSITION = {
-      x: 10,
-      y: 10,
-    }
-
-    this.ctx.font = '18px Trebuchet MS,roboto,ubuntu,sans-serif'
-    this.ctx.fillStyle = color || this.settings.colors.palette.error.main
-    const textMetrics = this.ctx.measureText(message)
-    const textHeight = textMetrics.actualBoundingBoxAscent + textMetrics.actualBoundingBoxDescent
-
-    const messageWidth = textMetrics.width + 30 // padding horizontal 30
-    const messageHeight = textHeight + 20 // padding vertical 20
-    const alertImagePadding = 10
-    const alertImageSize = messageHeight - alertImagePadding
-    this.roundedRect(
-      this.ctx,
-      ALERT_MESSAGE_POSITION.x,
-      ALERT_MESSAGE_POSITION.y,
-      messageWidth + alertImageSize,
-      messageHeight,
-      5,
-    )
-
-    this.ctx.fillStyle = this.settings.colors.palette.text.secondary
-    this.ctx.fillText(
-      message,
-      ALERT_MESSAGE_POSITION.x + messageWidth / 2 - textMetrics.width / 2 + alertImageSize,
-      ALERT_MESSAGE_POSITION.y + messageHeight / 2 + textHeight / 2,
-    )
-
-    const alertImage = new Image()
-    alertImage.src = alertImageUrl
-    this.ctx.drawImage(
-      alertImage,
-      ALERT_MESSAGE_POSITION.x + alertImagePadding / 2,
-      ALERT_MESSAGE_POSITION.y + alertImagePadding / 2,
-      alertImageSize,
-      alertImageSize,
     )
   }
 }

@@ -181,7 +181,6 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
         x: chart.chartData.cursorX,
         y: chart.chartData.cursorY,
       }, chart.chartData.offsetX)
-      chart.alertMessage && chartLibrary?.showAlertMessage(chart.alertMessage)
     }
   }))
 
