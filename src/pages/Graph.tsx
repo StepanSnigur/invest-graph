@@ -6,6 +6,7 @@ import { ChartControls } from '../components/ChartControls'
 import { Chart } from '../components/Chart'
 import { ChartSidebar } from '../components/ChartSidebar'
 import { ChartSubData } from '../components/ChartSubData'
+import { ChartAlertSystem } from '../components/ChartAlertSystem'
 
 const ChartPage = styled.div`
   display: flex;
@@ -26,6 +27,7 @@ interface IGraph {
 export const Graph: React.FC<IGraph> =({ id }) => {
   return (
     <ChartPage>
+      <ChartAlertSystem />
       <Sidebar />
       <GraphWrapper>
         <ChartControls />
