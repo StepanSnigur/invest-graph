@@ -144,19 +144,31 @@ class Chart {
       }
     } catch (e) {
       this.setError('Не удалось загрузить график')
+      if (autoUpdate) {
+        this.unsubscribeFromUpdates()
+      }
     }
   }
 
   // websockets
   subscribeToUpdates = (ticker: string) => {
-    const handleSocketMessage = (event: MessageEvent) => {
-      const data = JSON.parse(event.data)
-      if (data.event === 'price') {
-        this.handleSocketMessage(JSON.parse(event.data))
+    try {
+      const handleSocketMessage = (event: MessageEvent) => {
+        const data = JSON.parse(event.data)
+        if (data.event === 'price') {
+          this.handleSocketMessage(JSON.parse(event.data))
+        }
       }
-    }
 
-    webSocketApi.openConnection(ticker, handleSocketMessage)
+      webSocketApi.openConnection(ticker, handleSocketMessage)
+    } catch (e) {
+      this.showAlertMessage('Автообновление отключено')
+      this.chartSettings.autoUpdate = false
+      this.unsubscribeFromUpdates()
+    }
+  }
+  unsubscribeFromUpdates = () => {
+    webSocketApi.closeConnection()
   }
   handleSocketMessage = (data: ISocketData) => {
     this.addBarToChart(data.price?.toString(), data.timestamp, data.day_volume?.toString())
@@ -299,6 +311,15 @@ const chart = new Chart()
 observe(chart.chartSettings, (change) => {
   if (change.type === 'update') {
     settingsSaver.changeField(change.name.toString(), change.newValue)
+    
+    // handle autoupdate change
+    if (chart.tickerMeta?.symbol) {
+      if (chart.chartSettings.autoUpdate) {
+        chart.subscribeToUpdates(chart.tickerMeta.symbol)
+      } else {
+        chart.unsubscribeFromUpdates()
+      }
+    }
   }
 })
 

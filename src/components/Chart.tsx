@@ -150,6 +150,8 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
       setIsLoading(false)
     }
     init()
+
+    return chart.unsubscribeFromUpdates
   }, [ticker])
 
   useEffect(() => reaction(
