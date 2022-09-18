@@ -5,6 +5,7 @@ import { ThemeContext } from '../context/ThemeContext'
 import styled from 'styled-components'
 import { tickersSearch } from '../store/tickersSearch'
 import { chartSketches } from '../store/chartSketches'
+import { chart } from '../store/chart'
 
 import appLogo from '../assets/images/logo.png'
 import homeIcon from '../assets/images/home-icon.png'
@@ -20,6 +21,8 @@ import textIcon from '../assets/images/text-icon.png'
 import sunIcon from '../assets/images/sun-icon.png'
 import moonIcon from '../assets/images/moon-icon.png'
 import settingsIcon from '../assets/images/settings-icon.png'
+import { SidebarButton as SidebarButtonComponent } from './SidebarButton'
+import { IDrawSettings } from '../store/chart'
 
 const SidebarWrapper = styled.div`
   width: 5%;
@@ -73,6 +76,15 @@ const ActiveIndicator = styled.div`
   background:#000;
 `
 
+interface ISidebarButton {
+  background: string,
+  icon: string,
+  onClick: () => void,
+  onContextMenu?: () => void,
+  title?: string,
+  isActive?: boolean,
+  paramName?: string,
+}
 export const Sidebar = observer(() => {
   const theme = useTheme()
   const themeContext = useContext(ThemeContext)
@@ -93,8 +105,22 @@ export const Sidebar = observer(() => {
     {
       background: '#332757',
       buttons: [
-        { background: '#7739FE', icon: pencilIcon, onClick: () => chartSketches.setToolsDrawingMode('drawLine'), isActive: chartSketches.isDrawingTools === 'drawLine' },
-        { background: '#7739FE', icon: paintIcon, onClick: () => chartSketches.changeDrawingMode(), isActive: chartSketches.isDrawing },
+        {
+          background: '#7739FE',
+          icon: pencilIcon,
+          onClick: () => chartSketches.setToolsDrawingMode('drawLine'),
+          onContextMenu: () => console.log('pencil'),
+          isActive: chartSketches.isDrawingTools === 'drawLine',
+          paramName: 'pencil',
+        },
+        {
+          background: '#7739FE',
+          icon: paintIcon,
+          onClick: () => chartSketches.changeDrawingMode(),
+          onContextMenu: () => console.log('brush'),
+          isActive: chartSketches.isDrawing,
+          paramName: 'brush',
+        },
         { background: '#7739FE', icon: measureIcon, onClick: () => chartSketches.setToolsDrawingMode('drawMeasureLine'), isActive: chartSketches.isDrawingTools === 'drawMeasureLine' },
         { background: '#7739FE', icon: patternIcon, onClick: () => console.log('trading pattern') },
         { background: '#7739FE', icon: textIcon, onClick: () => console.log('text') },
@@ -111,17 +137,46 @@ export const Sidebar = observer(() => {
     ]},
   ]
 
+  const handleOpenContextMenu = (e: React.MouseEvent, contextMenuCallback?: () => void) => {
+    e.preventDefault()
+    contextMenuCallback && contextMenuCallback()
+  }
+  const changeDrawSettings = (name: keyof IDrawSettings, newValue: any) => {
+    chart.changeDrawSettings(name, newValue)
+  }
+  const getDefaultDrawSettings = (paramName: string) => {
+    const params = Object.keys(chart.drawSettings).filter((name) => name.includes(paramName))
+    const settings: any = {}
+    params.forEach(param => {
+      settings[param.slice(paramName.length)] = chart.drawSettings[param as keyof IDrawSettings]
+    })
+    return settings
+  }
+
   return (
     <SidebarWrapper>
       {sidebarButtons.map((buttonBlock, i) => <ButtonsBlock background={buttonBlock.background} key={i}>
-        {buttonBlock.buttons.map((button, j) => <SidebarButton
+        {buttonBlock.buttons.map((button: ISidebarButton, j) => !button.onContextMenu ? <SidebarButton
           background={button.background}
           onClick={button.onClick}
+          onContextMenu={(e: React.MouseEvent) => handleOpenContextMenu(e, button.onContextMenu)}
           key={j}
         >
           <ButtonIcon src={button.icon} alt="button"/>
           {button.isActive ? <ActiveIndicator /> : null}
-        </SidebarButton>)}
+        </SidebarButton> : <SidebarButtonComponent
+          key={j}
+          background={button.background}
+          icon={button.icon}
+          onClick={button.onClick}
+          onContextMenu={button.onContextMenu}
+          isActive={button.isActive}
+          onParamChange={(name: string, newValue: any) => changeDrawSettings(
+            (button.paramName + name) as keyof IDrawSettings,
+            newValue,
+          )}
+          defaultValues={getDefaultDrawSettings(button.paramName as string)}
+        />)}
       </ButtonsBlock>)}
     </SidebarWrapper>
   )

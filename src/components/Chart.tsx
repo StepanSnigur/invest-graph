@@ -250,6 +250,7 @@ export const Chart: React.FC<IChart> = observer(({ ticker }) => {
             y: null,
           },
           drawFunction: chartSketches.isDrawingTools,
+          lineWidth: chart.drawSettings.pencilLineWidth,
         })
         chartSketches.setToolDrawIndex(chartSketches.toolDrawings.length - 1)
       }

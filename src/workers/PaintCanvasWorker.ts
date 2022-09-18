@@ -2,11 +2,12 @@ import { ISketch, ISketchPoint, IChartDrawing } from '../store/chartSketches'
 import { Theme } from '@mui/material'
 
 interface IPaintData {
-  sketches: string,
+  sketchesData: string,
   minPrice: number,
   maxPrice: number,
   offsetX: number,
   scaleY: number,
+  settings: string,
   chartColors: string,
 }
 const paintCanvasWorker = () => {
@@ -94,7 +95,6 @@ const paintCanvasWorker = () => {
         //store points in array
         res.push(x)
         res.push(y)
-  
       }
     }
   
@@ -118,7 +118,6 @@ const paintCanvasWorker = () => {
       ctx.beginPath()
       ctx.strokeStyle = chartColors.palette.primary.main
       ctx.setLineDash([])
-      ctx.lineWidth = 3
       ctx.moveTo(from.x + offsetX, fromYOffset)
       ctx.lineTo(to.x + offsetX, toYOffset)
       ctx.stroke()
@@ -149,7 +148,7 @@ const paintCanvasWorker = () => {
   
   
       ctx.setLineDash([])
-      ctx.lineWidth = 2
+      ctx.lineWidth = 3
       ctx.strokeStyle = fillColor
       ctx.fillStyle = fillColor
   
@@ -215,9 +214,12 @@ const paintCanvasWorker = () => {
   
   const drawCurve = (ctx: CanvasRenderingContext2D, height: number, paintData: IPaintData) => {
     const colors = JSON.parse(paintData.chartColors)
+    const sketchesData = JSON.parse(paintData.sketchesData)
+
     ctx.strokeStyle = colors.palette.primary.main
-    ctx.lineWidth = 2
-    JSON.parse(paintData.sketches).forEach((sketch: ISketch) => {
+
+    sketchesData.sketches.forEach((sketch: ISketch) => {
+      ctx.lineWidth = sketch.lineWidth
       ctx.beginPath()
       const mappedPoints = moveCurvePoints(
         sketch.points,
@@ -235,6 +237,7 @@ const paintCanvasWorker = () => {
     paintData: IPaintData,
   ) => {
     const { minPrice, maxPrice, offsetX, scaleY, chartColors } = paintData
+    ctx.lineWidth = drawing.lineWidth
     drawingLibrary[drawing.drawFunction](
       ctx,
       drawing.from,
@@ -244,7 +247,7 @@ const paintCanvasWorker = () => {
       maxPrice,
       height,
       scaleY,
-      JSON.parse(chartColors),
+      JSON.parse(chartColors)
     )
   }
 
@@ -253,7 +256,7 @@ const paintCanvasWorker = () => {
     if (data.offscreenCanvas) {
       context = data.offscreenCanvas.getContext('2d')
     }
-    if (context && data.sketches) {
+    if (context && data.sketchesData) {
       context.clearRect(0, 0, context.canvas.width, context.canvas.height)
       drawCurve(context, context.canvas.height, data)
     }

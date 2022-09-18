@@ -1,4 +1,5 @@
 import { makeAutoObservable } from 'mobx'
+import { chart } from '../store/chart'
 
 export type IDrawingFunctions = 'drawLine' | 'drawMeasureLine'
 export interface ISketchPoint {
@@ -7,6 +8,7 @@ export interface ISketchPoint {
 }
 export interface ISketch {
   points: ISketchPoint[],
+  lineWidth: number,
 }
 export interface IChartDrawing {
   from: {
@@ -18,6 +20,7 @@ export interface IChartDrawing {
     y: number | null,
   },
   drawFunction: IDrawingFunctions,
+  lineWidth: number,
 }
 
 class ChartSketches {
@@ -43,7 +46,8 @@ class ChartSketches {
   // sketches
   startDrawing = () => {
     this.sketches.push({
-      points: []
+      points: [],
+      lineWidth: chart.drawSettings.brushLineWidth,
     })
   }
   addPointToDraw = (x: number, y: number) => {
