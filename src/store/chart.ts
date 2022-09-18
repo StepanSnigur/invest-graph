@@ -48,6 +48,12 @@ export interface IChartSettings {
   interval: keyof IConvertedTimestampsDiff,
   autoUpdate: boolean,
 }
+export interface IDrawSettings {
+  brushLineWidth: number,
+  brushColor: string,
+  pencilLineWidth: number,
+  pencilColor: string,
+}
 interface ICanvasElementData {
   width: number,
 }
@@ -100,6 +106,13 @@ class Chart {
     scaleY: 0.9,
     interval: '1min',
     autoUpdate: true,
+  }
+  drawSettings: IDrawSettings = {
+    // naming method: "{tool name}{setting name}"
+    brushLineWidth: 2,
+    brushColor: 'red', // TODO
+    pencilLineWidth: 2,
+    pencilColor: 'red', // TODO
   }
   canvasElementData: ICanvasElementData = {
     width: 0,
@@ -293,6 +306,10 @@ class Chart {
   }
   setCanvasElementWidth = (width: number) => {
     this.canvasElementData.width = width
+  }
+
+  changeDrawSettings = (name: keyof IDrawSettings, newValue: any) => {
+    (this.drawSettings[name] as unknown as Pick<IDrawSettings, typeof name>) = newValue
   }
 
   showAlertMessage = (message: string, timeout: number = 3000) => {

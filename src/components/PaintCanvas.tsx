@@ -61,12 +61,13 @@ export const PaintCanvas: React.FC<IPaintCanvas> = observer(({
   useEffect(() => {
     autorun(() => {
       paintCanvasWorker.postMessage({
-        sketches: JSON.stringify(chartSketches.sketches),
+        sketchesData: JSON.stringify(chartSketches),
         toolDrawings: JSON.stringify(chartSketches.toolDrawings),
         offsetX: chart.chartData.drawingsOffsetX,
         scaleY: chart.chartSettings.scaleY,
         minPrice: chartConnector.data.minChartPrice,
         maxPrice: chartConnector.data.maxChartPrice,
+        settings: JSON.stringify(chart.drawSettings),
         chartColors: JSON.stringify(theme),
       })
     })
